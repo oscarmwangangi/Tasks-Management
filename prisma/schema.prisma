@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// --- Enums for type safety ---
+
+enum Role {
+  admin
+  user
+}
+
+enum TaskStatus {
+  backlog
+  todo
+  in_progress
+  active
+  review
+  done
+}
+
+enum TaskPriority {
+  low
+  medium
+  high
+}
+
+enum MessageType {
+  reminder
+  system
+  info
+}
+
+// --- Models ---
+
+model User {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  email         String         @unique
+  password      String
+  role          Role           @default(user)
+  created_at    DateTime       @default(now())
+
+  // Relations
+  teamsCreated  Team[]         @relation("TeamCreator")
+  teamMembers   TeamMember[]
+  tasksCreated  Task[]         @relation("TaskCreator")
+  tasksAssigned Task[]         @relation("TaskAssignee")
+  favorites     Favorite[]
+  messages      Message[]
+}
+
+model Team {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  created_by  String?      @db.Uuid
+  created_at  DateTime     @default(now())
+  
+  // Relations
+  creator     User?        @relation("TeamCreator", fields: [created_by], references: [id])
+  members     TeamMember[]
+  tasks       Task[]
+}
+
+model TeamMember {
+  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  team_id String @db.Uuid
+  user_id String @db.Uuid
+  role    String @default("member")
+
+  // Relations
+  team    Team   @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([team_id, user_id]) // Prevent duplicate memberships
+}
+
+model Task {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String
+  description String?
+  status      TaskStatus   @default(backlog)
+  priority    TaskPriority @default(medium)
+  due_date    DateTime?    @db.Date
+  start_date  DateTime?    @db.Date
+  end_date    DateTime?    @db.Date
+  is_favorite Boolean      @default(false)
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt // Automatically updates on save
+  
+  created_by  String?      @db.Uuid
+  assigned_to String?      @db.Uuid
+  team_id     String?      @db.Uuid
+
+  // Relations
+  creator     User?        @relation("TaskCreator", fields: [created_by], references: [id])
+  assignee    User?        @relation("TaskAssignee", fields: [assigned_to], references: [id])
+  team        Team?        @relation(fields: [team_id], references: [id])
+  favorites   Favorite[]
+  messages    Message[]
+}
+
+model Favorite {
+  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id String @db.Uuid
+  task_id String @db.Uuid
+
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  task    Task   @relation(fields: [task_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, task_id])
+}
+
+model Message {
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String      @db.Uuid
+  task_id    String      @db.Uuid
+  message    String
+  type       MessageType @default(reminder)
+  is_read    Boolean     @default(false)
+  send_at    DateTime?
+  created_at DateTime    @default(now())
+
+  user       User        @relation(fields: [user_id], references: [id])
+  task       Task        @relation(fields: [task_id], references: [id])
+}

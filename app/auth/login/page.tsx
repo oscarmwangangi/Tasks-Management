@@ -1,15 +1,24 @@
 "use client";
-import { loginUser }  from "../register/actions";
-import { useActionState } from "react";
+import { loginUser }  from "../actions";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const initialState = {
     success: false,
-    message: ""
+    message: "",
+    redirect: ""
 };
 
 export default function LoginPage() {
     const [state, formAction, pending] = useActionState(loginUser, initialState);
-     
+    const router = useRouter();
+
+    useEffect(() => {
+        if (state.redirect) {
+            router.push(state.redirect);
+        }
+    }, [state.redirect, router]);
+
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center -mt-16">
             <h1 className="text-4xl font-bold mb-8 font-(family-name:--font-geist-sans text-[#333333]">

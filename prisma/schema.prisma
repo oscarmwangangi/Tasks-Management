@@ -54,6 +54,14 @@ model User {
   messages      Message[]
 }
 
+model Otp {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  otp  String   // Hashed version of the OTP
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
 model Team {
   id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String

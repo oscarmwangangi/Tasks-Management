@@ -1,98 +1,168 @@
-"use client"
-import prisma from "@/lib/prisma";
-import {registerUser} from "./actions";
-import { useActionState } from "react";
+"use client";
 
 
- const initialState = {
-    success: false,
-    message: ""
- }
+const initialState = {
+  success: false,
+  message: "",
+  redirect: "",
+  token: "",
+};
+
+type Step = "register" | "verify";
 
 export default function RegisterPage() {
- const [state, formAction, pending] = useActionState(registerUser, initialState);
+  const [state, formAction, pending] = useActionState(registerUser, initialState);
+  const [verifyState, verifyAction, verifyPending] =
+  useActionState(verifyOtp, initialState);
+  const [step, setStep] = useState<Step>("register");
+  const router = useRouter();
+  const [token, setToken] = useState("");
 
 
 
-    return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center -mt-16">
-            <h1 className="text-4xl font-bold mb-8 font-(family-name:--font-geist-sans text-[#333333]">
-                Register
-            </h1>
-            <form action={formAction} className="bg-white p-6 rounded shadow-md w-full max-w-sm">
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
-                        First Name
-                        </label>
-                    <input
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        id="firstName"
-                        type="text"
-                        name="firstName"
-                        placeholder="Your name"
-                        required
-                    />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
-                        Second Name
-                        </label>
-                    <input
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        id="secondName"
-                        name="secondName"
-                        type="text"
-                        placeholder="Your second name"
-                        required
-                    />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-                        Email
-                    </label>
-                    <input
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="Your email"
-                        required
-                    />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-                        Password
-                    </label>
-                    <input
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        id="password"
-                        name="password"
-                        type="password"
-                        placeholder="Your password"
-                        required
-                    />
-                </div>
-                {state.message && (
-                   <p className={
-                    state.success ? "text-green-400" : "text-red-500"}
-                   >
-                    {state.message}
-                   </p>
-                )}
-                <div className="flex items-center justify-between">
+  useEffect(() => {
+    if (state.redirect) {
+      router.push(state.redirect);
+    }
+    if(state.success){
+      setToken((state as any).token);
+      setStep("verify");
+    }
+  }, [state, router]);
 
-                    <button
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                        type="submit"
-                        disabled={pending}
-                    >
-                       {pending ? "Loading..." : "Register"}
-                    </button>
-                </div>
-            </form>
-            <span className="text-sm text-gray-600 mt-4">
-                Already have an account? <a href="/auth/login" className="text-blue-500 hover:text-blue-700">Login here</a>
-            </span>
+  return (
+    <div className="min-h-screen bg-amber-950 flex flex-col items-center justify-center px-4 py-12 transition-colors duration-300">
+
+      {/* ── Logo / Brand ── */}
+      <div className="mb-8 flex flex-col items-center gap-2">
+        <div className="w-10 h-10 rounded-xl bg-(--color-accent) flex items-center justify-center shadow-md">
+          <ChecklistIcon />
         </div>
-    );
+        <span className="text-(--color-text-primary) text-lg font-semibold tracking-tight">
+          TaskFlow
+        </span>
+      </div>
+
+      {/* ── Card ── */}
+      <div className="w-full max-w-sm rounded-2xl border border-(--color-border) bg-(--color-surface) shadow-sm p-8">
+
+        {/* ── Step indicator ── */}
+        <StepIndicator current={step} />
+
+        {/* ── Step: Register ── */}
+        {step === "register" && (
+          <>
+            <h1 className="mt-6 text-2xl font-semibold text-(--color-text-primary) tracking-tight">
+              Create your account
+            </h1>
+            <p className="mt-1 text-sm text-(--color-text-muted)">
+              Start managing tasks in seconds.
+            </p>
+
+            <form action={formAction} className="mt-6 flex flex-col gap-4">
+              {/* First & Last name side-by-side */}
+              <div className="grid grid-cols-2 gap-3">
+                <Field id="firstName" name="firstName" label="First name" placeholder="Ada" />
+                <Field id="secondName" name="secondName" label="Last name" placeholder="Lovelace" />
+              </div>
+
+              <Field id="email" name="email" type="email" label="Email" placeholder="ada@example.com" />
+              <Field id="password" name="password" type="password" label="Password" placeholder="Min. 8 characters" />
+
+              <StatusMessage state={state} />
+
+              <button
+                type="submit"
+                disabled={pending}
+                className="mt-1 w-full rounded-lg hover:bg-(--color-accent-hover) active:scale-[0.98] transition-all text-white font-medium py-2.5 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {pending ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Spinner /> Creating account…
+                  </span>
+                ) : (
+                  "Create account"
+                )}
+              </button>
+            </form>
+          </>
+        )}
+
+        {/* ── Step: Verify OTP ── */}
+        {step === "verify" && (
+          <>
+            <h1 className="mt-6 text-2xl font-semibold text-(--color-text-primary) tracking-tight">
+              Check your inbox
+            </h1>
+            <p className="mt-1 text-sm text-(--color-text-muted)">
+              We sent a 6-digit code to your email address.
+            </p>
+
+            <form action={verifyAction} className="mt-6 flex flex-col gap-4">
+              <Field
+                id="otp"
+                name="otp"
+                label="Verification code"
+                placeholder="123456"
+                inputMode="numeric"
+                // maxLength={6}
+                // pattern="[0-9]{6}"
+                onChange={(e) => {sendOtpToEmail(e.target.value)}}
+              />
+              <input type="hidden" name="token" value={token} />
+
+              <StatusMessage state={state} />
+
+              <button
+                type="submit"
+                disabled={pending}
+                className="mt-1 w-full rounded-lg hover:bg-(--color-accent-hover) active:scale-[0.98] transition-all text-white font-medium py-2.5 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {pending ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Spinner /> Verifying…
+                  </span>
+                ) : (
+                  "Verify email"
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStep("register")}
+                className="text-xs text-center text-(--color-text-muted) hover:text-(--color-text-primary) transition-colors"
+              >
+                ← Back to registration
+              </button>
+            </form>
+          </>
+        )}
+      </div>
+
+      {/* ── Footer link ── */}
+      <p className="mt-6 text-sm text-(--color-text-muted)">
+        Already have an account?{" "}
+        <a
+          href="/auth/login"
+          className="font-medium text-(--color-accent) hover:underline"
+        >
+          Log in
+        </a>
+      </p>
+
+
+    </div>
+  );
 }
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { registerUser } from "../actions";
+
+import { Field } from "../shared/ui/field";
+import { StatusMessage } from "../shared/ui/statusmessage";
+import { StepIndicator } from "../shared/ui/stepIndictor";
+import { Spinner } from "../shared/ui/spinner";
+import { ChecklistIcon } from "@/app/features/icon/checkListIcon";
+
+import { sendOtpToEmail } from "../otp_utils";
+import { verifyOtp } from "../actions";

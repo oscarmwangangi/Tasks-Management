@@ -5,55 +5,53 @@ import prisma from "@/lib/prisma";
 import { ActionResult } from "./actions";
 import jwt from "jsonwebtoken";
 
-export async function sendOtpToEmail(email: string) {
+export type SendOtpResult = { success: true; message: string } | { success: false; message: string };
 
-    const formData = new FormData();
-    formData.append('email', email);
-
-
-
+export async function sendOtpToEmail(email: string): Promise<SendOtpResult> {
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // OTP expires in 5 minutes
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit OTP
-    const hashOtp = bcrypt.hashSync(otp, 10); // Hash the OTP for secure storage
-    
+    const hashOtp = await bcrypt.hash(otp, 10); // Hash the OTP for secure storage (async)
+
+    const emailUser = process.env.EMAIL_USER;
+    const emailPass = process.env.EMAIL_PASS;
+
+    if (!emailUser || !emailPass) {
+        return { success: false, message: "Email service is not configured." };
+    }
+
     const transporter = nodemailer.createTransport({
         service: "Gmail",
         auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
+            user: emailUser,
+            pass: emailPass,
         },
     });
-    
+
     try {
-        const saveOtp = await prisma.otp.upsert({
+        await prisma.otp.upsert({
             where: { email },
             update: {
                 otp: hashOtp,
-                expiresAt
+                expiresAt,
             },
             create: {
                 email,
                 otp: hashOtp,
-                expiresAt
+                expiresAt,
             },
         });
 
         await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+            from: emailUser,
             to: email,
             subject: "Your OTP Code",
             text: `Your OTP code is: ${otp}`,
         });
 
-        return {
-            success: true,
-            message: "OTP sent to email"
-        }
-            
-    }catch (error) {
+        return { success: true, message: "OTP sent to email" };
+    } catch (error) {
         console.error("Error sending OTP email:", error);
+        return { success: false, message: "Failed to send OTP. Please try again." };
     }
-
 }
-

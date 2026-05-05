@@ -1,5 +1,16 @@
 "use client";
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { registerUser } from "../actions";
 
+import { Field } from "../shared/ui/field";
+import { StatusMessage } from "../shared/ui/statusmessage";
+import { StepIndicator } from "../shared/ui/stepIndictor";
+import { Spinner } from "../shared/ui/spinner";
+import { ChecklistIcon } from "@/app/features/icon/checkListIcon";
+
+import { sendOtpToEmail } from "../otp_utils";
+import { verifyOtp } from "../actions";
 
 const initialState = {
   success: false,
@@ -12,26 +23,34 @@ type Step = "register" | "verify";
 
 export default function RegisterPage() {
   const [state, formAction, pending] = useActionState(registerUser, initialState);
-  const [verifyState, verifyAction, verifyPending] =
-  useActionState(verifyOtp, initialState);
+
+  const [verifyState, verifyAction, verifyPending] = useActionState(verifyOtp, initialState);
+
   const [step, setStep] = useState<Step>("register");
+
   const router = useRouter();
-  const [token, setToken] = useState("");
+  
+  const [otpToken, setOtpToken] = useState("");
 
 
 
-  useEffect(() => {
-    if (state.redirect) {
-      router.push(state.redirect);
-    }
-    if(state.success){
-      setToken((state as any).token);
-      setStep("verify");
-    }
-  }, [state, router]);
+useEffect(() => {
 
+  if (state.success && state.token) {
+    setOtpToken(state.token);
+    setStep("verify");
+  }
+
+}, [state]);
+useEffect(() => {
+
+  if (verifyState.success && verifyState.redirect) {
+    router.push(verifyState.redirect);
+  }
+
+}, [verifyState, router]);
   return (
-    <div className="min-h-screen bg-amber-950 flex flex-col items-center justify-center px-4 py-12 transition-colors duration-300">
+     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center -mt-16">
 
       {/* ── Logo / Brand ── */}
       <div className="mb-8 flex flex-col items-center gap-2">
@@ -91,10 +110,10 @@ export default function RegisterPage() {
         {/* ── Step: Verify OTP ── */}
         {step === "verify" && (
           <>
-            <h1 className="mt-6 text-2xl font-semibold text-(--color-text-primary) tracking-tight">
+            <h1 className="mt-6 text-2xl font-semibold text-text-primary tracking-tight">
               Check your inbox
             </h1>
-            <p className="mt-1 text-sm text-(--color-text-muted)">
+            <p className="mt-1 text-sm text-text-muted">
               We sent a 6-digit code to your email address.
             </p>
 
@@ -105,13 +124,12 @@ export default function RegisterPage() {
                 label="Verification code"
                 placeholder="123456"
                 inputMode="numeric"
-                // maxLength={6}
-                // pattern="[0-9]{6}"
-                onChange={(e) => {sendOtpToEmail(e.target.value)}}
+                maxLength={6}
+                pattern="[0-9]{6}"
               />
-              <input type="hidden" name="token" value={token} />
+             <input type="hidden" name="token" value={otpToken} />
 
-              <StatusMessage state={state} />
+              <StatusMessage state={verifyState} />
 
               <button
                 type="submit"
@@ -154,15 +172,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-import { useActionState, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { registerUser } from "../actions";
-
-import { Field } from "../shared/ui/field";
-import { StatusMessage } from "../shared/ui/statusmessage";
-import { StepIndicator } from "../shared/ui/stepIndictor";
-import { Spinner } from "../shared/ui/spinner";
-import { ChecklistIcon } from "@/app/features/icon/checkListIcon";
-
-import { sendOtpToEmail } from "../otp_utils";
-import { verifyOtp } from "../actions";

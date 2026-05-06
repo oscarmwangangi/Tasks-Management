@@ -1,20 +1,28 @@
+"use client";
+// import prisma from "@/lib/prisma";
+import { useRouter } from "next/navigation";
+import { useAuthGuard } from "./hooks/useAuthGuard";
+import { useAuth } from "./hooks/localStorage";
 
-import prisma from "@/lib/prisma";
-import { use } from "react";
-
-export default async function Home() {
-  const users = await prisma.user.findMany();
+export default function Home() {
+  useAuthGuard();
+  const user = useAuth();
+  const router = useRouter();
+  const handleLogout = async () => {
+    localStorage.removeItem("user");
+    router.replace("/auth/login");
+    
+  }
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center -mt-16">
       <h1 className="text-4xl font-bold mb-8 font-(family-name:--font-geist-sans) text-[#333333]">
         Superblog
       </h1>
       <ol className="list-decimal list-inside font-(family-name:--font-geist-sans)">
-        {users.map((user) => (
-          <li key={user.id} className="mb-2">
-            {user.firstName}
-          </li>
-        ))}
+        <button onClick={handleLogout}>
+logout
+        </button>
+        email: {user?.email}
       </ol>
     </div>
   );

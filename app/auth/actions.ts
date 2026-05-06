@@ -11,16 +11,20 @@ export type ActionResult = {
   message: string;
   redirect?: string;
   token?: string;
+  user?: {
+    userId: string;
+    email: string;
+  };
 };
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const JWT_SECRET = process.env.JWT_SECRET!;
 
-function validateEmail(email: string): boolean {
+export async function validateEmail(email: string): Promise<boolean> {
   return EMAIL_REGEX.test(email.trim());
 }
 
-function validatePassword(password: string): boolean {
+export async function validatePassword(password: string): Promise<boolean> {
   return password.length >= 8;
 }
 
@@ -94,7 +98,7 @@ export async function registerUser(
       },
       JWT_SECRET,
       {
-        expiresIn: "10m",
+        expiresIn: "5m",
       }
     );
 
@@ -137,7 +141,6 @@ export async function verifyOtp(
   }
 
   try {
-
     // ── Verify JWT ──
     const decoded = jwt.verify(token, JWT_SECRET) as {
       firstName: string;
@@ -233,75 +236,6 @@ export async function verifyOtp(
     return {
       success: false,
       message: "Session expired. Please register again.",
-    };
-  }
-}
-
-export async function loginUser(
-  _state: ActionResult,
-  formData: FormData
-): Promise<ActionResult> {
-
-  const email =
-    (formData.get("email") as string | null)
-      ?.trim()
-      .toLowerCase() ?? "";
-
-  const password =
-    (formData.get("password") as string | null) ?? "";
-
-  // ── Validation ──
-  if (!email || !password) {
-    return {
-      success: false,
-      message: "Please fill in all fields.",
-    };
-  }
-
-  if (!validateEmail(email)) {
-    return {
-      success: false,
-      message: "Please enter a valid email address.",
-    };
-  }
-
-  try {
-
-    // ── Find user ──
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    // ── Prevent timing attacks ──
-    const DUMMY_HASH =
-      "$2b$12$invalidhashplaceholderXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
-
-    const hashToCompare =
-      user?.password ?? DUMMY_HASH;
-
-    const isPasswordValid =
-      await bcrypt.compare(password, hashToCompare);
-
-    if (!user || !isPasswordValid) {
-      return {
-        success: false,
-        message: "Invalid email or password.",
-      };
-    }
-
-    return {
-      success: true,
-      message: "Logged in successfully.",
-      redirect: "/",
-    };
-
-  } catch (error) {
-
-    console.error("[loginUser] Error:", error);
-
-    return {
-      success: false,
-      message: "Something went wrong. Please try again.",
     };
   }
 }

@@ -9,17 +9,11 @@ import { StepIndicator } from "../shared/ui/stepIndictor";
 import { Spinner } from "../shared/ui/spinner";
 import { ChecklistIcon } from "@/app/features/icon/checkListIcon";
 
-import { sendOtpToEmail } from "../otp_utils";
 import { verifyOtp } from "../actions";
-
-const initialState = {
-  success: false,
-  message: "",
-  redirect: "",
-  token: "",
-};
+import { initialState } from "../../hooks/login"
 
 type Step = "register" | "verify";
+
 
 export default function RegisterPage() {
   const [state, formAction, pending] = useActionState(registerUser, initialState);
@@ -34,21 +28,20 @@ export default function RegisterPage() {
 
 
 
-useEffect(() => {
+  useEffect(() => {
+    if (state.success && state.token) {
+      setOtpToken(state.token);
+      setStep("verify");
+    }
+  }, [state]);
 
-  if (state.success && state.token) {
-    setOtpToken(state.token);
-    setStep("verify");
-  }
 
-}, [state]);
-useEffect(() => {
-
-  if (verifyState.success && verifyState.redirect) {
-    router.push(verifyState.redirect);
-  }
-
-}, [verifyState, router]);
+  useEffect(() => {
+    if (verifyState.success && verifyState.redirect) {
+      router.push(verifyState.redirect);
+    }
+  }, [verifyState, router]);
+  
   return (
      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center -mt-16">
 
@@ -119,13 +112,7 @@ useEffect(() => {
 
             <form action={verifyAction} className="mt-6 flex flex-col gap-4">
               <Field
-                id="otp"
-                name="otp"
-                label="Verification code"
-                placeholder="123456"
-                inputMode="numeric"
-                maxLength={6}
-                pattern="[0-9]{6}"
+                id="otp" name="otp" label="Verification code" placeholder="123456" inputMode="numeric" maxLength={6} pattern="[0-9]{6}"
               />
              <input type="hidden" name="token" value={otpToken} />
 

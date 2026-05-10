@@ -3,10 +3,10 @@ import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { registerUser } from "../actions";
 
-import { Field } from "../shared/ui/field";
-import { StatusMessage } from "../shared/ui/statusmessage";
-import { StepIndicator } from "../shared/ui/stepIndictor";
-import { Spinner } from "../shared/ui/spinner";
+import { Field } from "../../shared/ui/field";
+import { StatusMessage } from "../../shared/ui/statusmessage";
+import { StepIndicator } from "../../shared/ui/stepIndictor";
+import { Spinner } from "../../shared/ui/spinner";
 import { ChecklistIcon } from "@/app/features/icon/checkListIcon";
 
 import { verifyOtp } from "../actions";

@@ -171,7 +171,7 @@ export async function verifyLoginOtp(
     return {
       success: true,
       message: "Login successful.",
-      redirect: "/",
+      redirect: "/dashboard",
     user: {
         userId: decoded.userId,
         email: decoded.email,

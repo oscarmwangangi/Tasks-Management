@@ -35,6 +35,7 @@ export function useLoginHook() {
     if (state.success && state.user) {
       localStorage.setItem("user", JSON.stringify(state.user));
       console.log("user saved");
+      console.log(state.user);
     }
   }, [state]);
 

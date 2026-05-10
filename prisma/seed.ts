@@ -76,7 +76,50 @@ async function main() {
       team_id: team.id,
     },
   })
-
+    const task3 = await prisma.task.create({
+    data: {
+      title: "Flutter project",
+      description: "Initialize backend and frontend",
+      status: "in_progress",
+      priority: "high",
+      created_by: user1.id,
+      assigned_to: user2.id,
+      team_id: team.id,
+    },
+  })
+  const task4 = await prisma.task.create({
+    data: {
+      title: "Telegram project",
+      description: "Initialize backend and frontend",
+      status: "todo",
+      priority: "high",
+      created_by: user1.id,
+      assigned_to: user2.id,
+      team_id: team.id,
+    },
+  })
+    const task5 = await prisma.task.create({
+    data: {
+      title: "Pen test project",
+      description: "Initialize backend and frontend",
+      status: "done",
+      priority: "high",
+      created_by: user1.id,
+      assigned_to: user2.id,
+      team_id: team.id,
+    },
+  })
+    const task6 = await prisma.task.create({
+    data: {
+      title: "laravel project",
+      description: "Initialize backend and frontend",
+      status: "active",
+      priority: "high",
+      created_by: user1.id,
+      assigned_to: user2.id,
+      team_id: team.id,
+    },
+  })
   // 5. Add Favorite
   await prisma.favorite.create({
     data: {

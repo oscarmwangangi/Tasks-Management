@@ -1,7 +1,7 @@
 "use client";
-import { StatusMessage } from "../shared/ui/statusmessage";
-import { Field } from "../shared/ui/field";
-import { Spinner } from "../shared/ui/spinner";
+import { StatusMessage } from "../../shared/ui/statusmessage";
+import { Field } from "../../shared/ui/field";
+import { Spinner } from "../../shared/ui/spinner";
 import { useLoginHook } from "@/app/hooks/login";
 
 

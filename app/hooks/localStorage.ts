@@ -8,6 +8,7 @@ export function useAuth() {
   useEffect(() => {
     const stored = localStorage.getItem("user");
     setUser(stored ? JSON.parse(stored) : null);
+    console.log("user loaded from localStorage:", stored);
   }, []);
 
   return user;

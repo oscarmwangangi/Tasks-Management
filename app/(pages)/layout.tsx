@@ -46,10 +46,10 @@ export default function DashboardLayout({
       <div className="flex min-h-screen w-full m-0 p-0">
         <AppSidebar />
 
-        <main className="flex-1">
+        <main className="flex-1 ">
           
 
-          <div className="">
+          <div className=" ">
             {children}
           </div>
         </main>

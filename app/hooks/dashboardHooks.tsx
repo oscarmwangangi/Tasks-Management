@@ -5,7 +5,7 @@ import { getDashboardCards } from "@/app/services/dashboardCards";
 import { doughnutData } from "@/app/services/doughnutData";
 import { tableData } from "@/app/services/tableData";
 
-export function useDashboardHooks() {
+export function useDashboardHooks(customPageSize:number) {
   const [stats, setStats] = useState<any>(null);
   const [priority, setPriority] = useState<any>(null);
   const [table, setTable] = useState<{
@@ -17,12 +17,13 @@ export function useDashboardHooks() {
   const [loading, setLoading] = useState(true);
 
   async function loadDashboard() {
+    const size = customPageSize || 5;
     try {
       setLoading(true);
       const [statsData, priorityData, taskData] = await Promise.all([
         getDashboardCards(),
         doughnutData(),
-        tableData(page, 5),
+        tableData(page, size),
       ]);
 
       setStats(statsData);

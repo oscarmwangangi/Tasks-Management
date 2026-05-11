@@ -6,7 +6,7 @@ export function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
+    <div className="group rounded-3xl border border-white/5 bg-white/3 p-5 transition-all hover:border-emerald-500/20 hover:bg-white/5 hover:shadow-xl hover:shadow-black/20 ">
       <h2 className="text-lg font-semibold mb-6">
         {title}
       </h2>

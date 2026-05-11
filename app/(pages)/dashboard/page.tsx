@@ -39,12 +39,13 @@ export default function DashboardPage() {
   const { 
     stats, loading, table, polarData, doughnutOptions,
     doughnutChartData, chartOptions, setPage 
-  } = useDashboardHooks();
+  } = useDashboardHooks(5);
 
   if (loading && !stats) return <DashboardSkeleton />;
 
   return (
     <div className="min-h-screen bg-[#020617] text-white p-4 md:p-6">
+
 <header className="mt-8">
   <div className="relative flex flex-col gap-6 mb-8 shadow-2xl shadow-black/20 md:flex-row md:items-center md:justify-between">
     
@@ -183,7 +184,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Table */}
-      <div className="mt-8 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden">
+      <div className="mt-8 group rounded-3xl border border-white/5 bg-white/3 p-5 transition-all hover:border-emerald-500/20 hover:bg-white/5 hover:shadow-xl hover:shadow-black/20 overflow-hidden">
         <div className="p-6 border-b border-white/10 flex items-center justify-between">
           <h2 className="text-xl font-semibold">
             Recent Tasks

@@ -6,7 +6,7 @@ import {
   SidebarGroup,
   SidebarHeader,
 } from "../../shared/ui/sidebar"
-import { Settings, LayoutDashboard } from "lucide-react";
+import { Settings, LayoutDashboard,ListTodo } from "lucide-react";
 import { useRouter } from "next/navigation";
 export function AppSidebar() {
   const router = useRouter();
@@ -25,6 +25,10 @@ export function AppSidebar() {
         <SidebarGroup to="/dashboard" icon={LayoutDashboard}>
 
           Dashboard
+        </SidebarGroup>
+
+         <SidebarGroup to="/tasks" icon={ListTodo}>
+          Tasks
         </SidebarGroup>
 
         <SidebarGroup to="/settings" icon={Settings}>

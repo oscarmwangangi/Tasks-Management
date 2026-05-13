@@ -5,7 +5,6 @@ import { useAuthGuard } from "../hooks/useAuthGuard"
 
 import {
   SidebarProvider,
-  SidebarTrigger,
 } from "../shared/ui/sidebar"
 
 import { AppSidebar } from "@/app/components/reusable/app-sidebar"
@@ -17,7 +16,7 @@ export default function DashboardLayout({
 }) {
   useAuthGuard()
 
-  const user = useAuth()
+  const {user} = useAuth()
 
  if (!user) {
     return (

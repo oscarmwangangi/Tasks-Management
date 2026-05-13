@@ -31,6 +31,15 @@ export function AppSidebar() {
           Tasks
         </SidebarGroup>
 
+        <SidebarGroup to="/teams" icon={ListTodo}>
+          Teams
+        </SidebarGroup>
+
+        <SidebarGroup to="/projects" icon={ListTodo}>
+          Projects
+        </SidebarGroup>
+
+
         <SidebarGroup to="/settings" icon={Settings}>
           Settings
         </SidebarGroup>

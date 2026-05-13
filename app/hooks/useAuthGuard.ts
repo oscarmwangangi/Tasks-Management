@@ -9,14 +9,13 @@ export function useAuthGuard() {
   useEffect(() => {
     const user = localStorage.getItem("user");
 
-    // ❌ block all invalid cases
+
     if (!user || user === "null" || user === "undefined") {
       localStorage.removeItem("user");
       router.replace("/auth/login");
       return;
     }
 
-    // ✅ extra safety: validate JSON
     try {
       JSON.parse(user);
     } catch {

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 export default function SettingsPage() {
     useAuthGuard();
-    const user = useAuth();
+    const {user} = useAuth();
     const router = useRouter();
      
 

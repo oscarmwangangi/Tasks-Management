@@ -35,7 +35,7 @@ ChartJS.register(RadialLinearScale, ArcElement, Tooltip, Legend);
 export default function DashboardPage() {
   useAuthGuard();
 
-  const user = useAuth();
+  const {user} = useAuth();
   const { 
     stats, loading, table, polarData, doughnutOptions,
     doughnutChartData, chartOptions, setPage 

@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import prisma from "@/lib/prisma";
-import { useAuth } from "../../hooks/localStorage";
+import { useAuth } from "../hooks/localStorage";
 
 
 

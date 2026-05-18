@@ -8,6 +8,7 @@ import {
 } from "../../shared/ui/sidebar"
 import { Settings, LayoutDashboard,ListTodo } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Dropdown } from "./dropdown"
 export function AppSidebar() {
   const router = useRouter();
 
@@ -29,11 +30,13 @@ export function AppSidebar() {
 
          <SidebarGroup to="/tasks" icon={ListTodo}>
           Tasks
+           <Dropdown />
         </SidebarGroup>
 
         <SidebarGroup to="/teams" icon={ListTodo}>
           Teams
         </SidebarGroup>
+      
 
         <SidebarGroup to="/projects" icon={ListTodo}>
           Projects

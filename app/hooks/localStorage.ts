@@ -17,6 +17,5 @@ export function useAuth() {
     console.log("User loaded from localStorage:", stored);
   }, []);
 
-  // Return as an object for easier destructuring in components
   return { user, userId };
 }

@@ -1,24 +1,16 @@
-"use client"
+import { auth } from "@/app/middlware/auth"; 
+import { SidebarProvider } from "@/app/shared/ui/sidebar"; 
+import { AppSidebar } from "@/app/components/reusable/app-sidebar";
 
-import { useAuth } from "../hooks/localStorage"
-import { useAuthGuard } from "../hooks/useAuthGuard"
+interface LayoutProps {
+  children: React.ReactNode;
+}
 
-import {
-  SidebarProvider,
-} from "../shared/ui/sidebar"
+export default async function DashboardLayout({ children }: LayoutProps) {
 
-import { AppSidebar } from "@/app/components/reusable/app-sidebar"
+  const session = await auth();
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  useAuthGuard()
-
-  const {user} = useAuth()
-
- if (!user) {
+  if (!session) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-950">
         <div className="flex flex-col items-center gap-4 px-10 py-12 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-2xl">
@@ -37,22 +29,21 @@ export default function DashboardLayout({
           </a>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full m-0 p-0">
+
         <AppSidebar />
 
-        <main className="flex-1 ">
-          
-
-          <div className=" ">
+        <main className="flex-1">
+          <div>
             {children}
           </div>
         </main>
       </div>
     </SidebarProvider>
-  )
+  );
 }

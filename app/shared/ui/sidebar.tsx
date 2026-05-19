@@ -115,51 +115,63 @@ export function SidebarContent({ children }: { children: React.ReactNode }) {
   return <div className="flex-1 overflow-y-auto py-4 space-y-1">{children}</div>
 }
 
-export function SidebarGroup({ 
-  children, 
-  to, 
-  icon: Icon 
-}: { 
-  children: React.ReactNode; 
+export function SidebarGroup({
+  children,
+  to,
+  icon: Icon,
+  rightContent,
+}: {
+  children: React.ReactNode;
   to: string;
   icon?: React.ElementType;
+  rightContent?: React.ReactNode;
 }) {
-  const pathname = usePathname()
-  const isActive = pathname === to
-  const { open } = useSidebar()
+  const pathname = usePathname();
+  const isActive = pathname === to;
+  const { open } = useSidebar();
 
   return (
     <Link
       href={to}
-      title={!open ? String(children) : ""} // Tooltip on hover when closed
+      title={!open ? String(children) : ""}
       className={`
-        flex items-center transition-all duration-300 ease-in-out
-        ${isActive ? "bg-blue-600 text-white" : "text-gray-400 hover:bg-gray-800 hover:text-white"}
-        
-        /* Layout logic */
-        ${open 
-          ? "px-3 py-2 mx-2 gap-3 justify-start rounded-lg" 
-          : "px-0 py-2 mx-0 justify-center rounded-none" 
+        flex items-start transition-all duration-300 ease-in-out
+        ${isActive
+          ? "bg-blue-600 text-white"
+          : "text-gray-400 hover:bg-gray-800 hover:text-white"
+        }
+
+        ${open
+          ? "px-3 py-2 mx-2 gap-3 rounded-lg"
+          : "px-4 py-2 mx-0 rounded-none"
         }
       `}
     >
-      {/* Icon always stays visible */}
-      {Icon && (
-        <Icon 
-          size={18} 
-          className={`shrink-0 transition-transform duration-300 ${!open ? "scale-110" : ""}`} 
-        />
-      )}
-      
-      {/* Text disappears when closed */}
-      <span className={`
-        whitespace-nowrap overflow-hidden transition-all duration-300
-        ${open ? "w-auto opacity-100" : "w-0 opacity-0"}
-      `}>
-        {children}
-      </span>
+      {/* Left Side */}
+      <div className="flex items-center gap-3 flex-1">
+        {Icon && (
+          <Icon
+            size={18}
+            className={`shrink-0 transition-transform  duration-300 ${
+              !open ? "scale-110" : ""
+            }`}
+          />
+        )}
+
+        <span
+          className={`
+            whitespace-nowrap overflow-hidden  transition-all  duration-300
+            ${open ? "w-auto opacity-100" : "w-0 opacity-0"}
+          `}
+        >
+          {children}
+        </span>
+      </div>
+
+      {/* Right Side */}
+      {open && rightContent}
     </Link>
-  )
+  );
 }
 
 export function SidebarFooter({ 

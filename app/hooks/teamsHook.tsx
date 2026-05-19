@@ -1,20 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import {
-  Bell,
-  CirclePlus,
-  Search,
-  Settings,
-  Star,
-  Users,
-  Shield,
-  LayoutGrid,
-  Trash2,
-  Plus,
-  UserMinus,
-} from "lucide-react";
 
-import { motion, AnimatePresence } from "framer-motion";
+
 import { z } from "zod";
 
 import { createTeam, deleteTeam, fetchTeams, addMemberToTeam, removeMemberFromTeam } from "@/app/actions/teamActions"
@@ -112,7 +99,7 @@ const { userId, user } = useAuth()
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, []);
 
   async function handleCreateTeam() {
@@ -168,7 +155,6 @@ const { userId, user } = useAuth()
         setIsDrawerOpen(true);
       }
     } catch (e) {
-      // revert
       const data = await fetchTeams();
       setTeams(data);
       setCreateError(e instanceof Error ? e.message : "Failed to delete team");

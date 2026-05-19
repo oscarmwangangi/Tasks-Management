@@ -22,33 +22,23 @@ export function useLoginHook() {
       const [otpToken, setOtpToken] = useState("");
     
 
-    
-
-  // handle login success
   useEffect(() => {
     if (state.success && state.token) {
       setOtpToken(state.token);
       setStep("verify");
     }
 
-    // safely store user ONLY when valid
-    if (state.success && state.user) {
-      localStorage.setItem("user", JSON.stringify(state.user));
-      console.log("user saved");
-      console.log(state.user);
-    }
   }, [state]);
 
-  //  handle OTP success
-  useEffect(() => {
-    if (verifyState.success && verifyState.redirect) {
-      router.replace(verifyState.redirect);
-    }
 
-    if (verifyState.success && verifyState.user) {
-      localStorage.setItem("user", JSON.stringify(verifyState.user));
-    }
-  }, [verifyState, router]);
+useEffect(() => {
+  if (verifyState.success && verifyState.redirect) {
+    console.log("Secure authentication cookie is set. Redirecting...");
+
+    router.replace(verifyState.redirect); 
+  }
+
+}, [verifyState, router]);
 
 return {
     state,

@@ -5,8 +5,8 @@ import { sendOtpToEmail } from "./otp_utils";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
-
+import { signIn } from "../middlware/auth";
+import { AuthError } from "next-auth";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 export async function loginUser(
@@ -114,77 +114,23 @@ export async function verifyLoginOtp(
 
   try {
 
-    const decoded = jwt.verify(
-      token,
-      JWT_SECRET
-    ) as {
-      userId: string;
-      email: string;
-    };
-
-    const otpRecord = await prisma.otp.findUnique({
-      where: {
-        email: decoded.email,
-      },
-    });
-
-    if (!otpRecord) {
-      return {
-        success: false,
-        message: "OTP not found.",
-      };
-    }
-
-    if (otpRecord.expiresAt < new Date()) {
-
-      await prisma.otp.delete({
-        where: {
-          email: decoded.email,
-        },
-      });
-
-      return {
-        success: false,
-        message: "OTP expired.",
-      };
-    }
-
-    const isOtpValid = await bcrypt.compare(
+    await signIn("credentials", {
       otp,
-      otpRecord.otp
-    );
-
-    if (!isOtpValid) {
-      return {
-        success: false,
-        message: "Invalid OTP.",
-      };
-    }
-
-    // Delete OTP after success
-    await prisma.otp.delete({
-      where: {
-        email: decoded.email,
-      },
+      token,
+      redirect: false, 
     });
 
     return {
       success: true,
       message: "Login successful.",
       redirect: "/dashboard",
-    user: {
-        userId: decoded.userId,
-        email: decoded.email,
-  },
     };
-
   } catch (error) {
-
-    console.error("[verifyLoginOtp] Error:", error);
-
-    return {
-      success: false,
-      message: "Session expired.",
-    };
+    if (error instanceof AuthError) {
+      
+      return { success: false, message: error.cause?.err?.message || "Authentication failed." };
+    }
+    
+    return { success: false, message: "An unexpected system error occurred." };
   }
 }

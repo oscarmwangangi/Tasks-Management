@@ -1,23 +1,44 @@
 import { useState } from "react";
-import { BiToggleLeft, BiToggleRight } from "react-icons/bi";
-import { SidebarGroup } from "../../shared/ui/sidebar"
-import { ListCheck } from "lucide-react";
-export  function Dropdown(){
-  const [isOpen, setIsOpen] = useState(false)
-    return(
-        <>
-        <BiToggleLeft
-        onClick={()=>setIsOpen(!isOpen)}
-        
-        />
-        {isOpen && (
-        <SidebarGroup to="/addTask"  icon={ListCheck}>
-            Add Task
-        </SidebarGroup>
+import { SidebarGroup } from "../../shared/ui/sidebar";
+
+type Props = {
+  OpenIcon: React.ElementType;
+  CloseIcon: React.ElementType;
+};
+
+export function Dropdown({
+  OpenIcon,
+  CloseIcon,
+}: Props) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="w-full">
+      {/* Header */}
+      <div className="flex items-start justify-end">
+        {isOpen ? (
+          <OpenIcon
+            onClick={() => setIsOpen(false)}
+            className="cursor-pointer"
+            size={20}
+          />
+        ) : (
+          <CloseIcon
+            onClick={() => setIsOpen(true)}
+            className="cursor-pointer"
+            size={20}
+          />
         )}
+      </div>
 
-        
-        </>
-    )
-
+      {/* Dropdown Content */}
+      {isOpen && (
+        <div className="flex justify-end">
+          <SidebarGroup to="/addTask">
+            Add Task
+          </SidebarGroup>
+        </div>
+      )}
+    </div>
+  );
 }

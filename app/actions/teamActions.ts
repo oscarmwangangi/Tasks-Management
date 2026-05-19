@@ -61,8 +61,7 @@ const CreateTeamSchema = z.object({
 });
 
 export async function createTeam(params: z.infer<typeof CreateTeamSchema> & { createdByUserId?: string }) {
-  // The current codebase doesn’t provide server-side auth context.
-  // We accept createdByUserId from client by reading it from passed params.
+
   
 const userId = params.createdByUserId;
   if (!userId) throw new Error("Missing createdByUserId");

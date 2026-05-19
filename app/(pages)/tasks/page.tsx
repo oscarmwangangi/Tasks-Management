@@ -9,8 +9,6 @@ import {
 
 import { useDashboardHooks } from "@/app/hooks/dashboardHooks";
 import { columns } from "@/app/data/statusColumn.data";
-
-import DashboardSkeleton from "@/app/features/dashboardSkeleton";
 import { TasksCard } from "@/app/shared/ui/TasksCard";
 import TaskPageSkeleton from "@/app/features/taskkeleton";
 

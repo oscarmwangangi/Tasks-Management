@@ -6,16 +6,24 @@ import {
   SidebarGroup,
   SidebarHeader,
 } from "../../shared/ui/sidebar"
-import { Settings, LayoutDashboard,ListTodo } from "lucide-react";
+import { Settings, LayoutDashboard,ListTodo, Users,  FolderKanban, } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Dropdown } from "./dropdown"
+import { handleServerLogout } from "@/app/actions/logout";
 export function AppSidebar() {
   const router = useRouter();
 
-  const handleLogout = () => {
-    localStorage.removeItem("user")
-    router.replace("/auth/login")
-  }
+
+
+const handleLogout = async () => {
+    try {
+      localStorage.removeItem("user");
+      await handleServerLogout();
+    } catch (error) {
+      console.error("Failed to log out:", error);
+    }
+  };
   return (
     <Sidebar>
       <SidebarHeader>
@@ -28,17 +36,20 @@ export function AppSidebar() {
           Dashboard
         </SidebarGroup>
 
-         <SidebarGroup to="/tasks" icon={ListTodo}>
+         <SidebarGroup to="/tasks" icon={ListTodo}   rightContent={<Dropdown
+              OpenIcon={ChevronDown}
+              CloseIcon={ChevronRight}
+           />}>
           Tasks
-           <Dropdown />
+           
         </SidebarGroup>
 
-        <SidebarGroup to="/teams" icon={ListTodo}>
+        <SidebarGroup to="/teams" icon={Users}>
           Teams
         </SidebarGroup>
       
 
-        <SidebarGroup to="/projects" icon={ListTodo}>
+        <SidebarGroup to="/projects" icon={FolderKanban}>
           Projects
         </SidebarGroup>
 

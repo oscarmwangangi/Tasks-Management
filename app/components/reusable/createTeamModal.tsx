@@ -2,21 +2,26 @@
 import { TeamHooks } from "@/app/hooks/teamsHook";
 
 import { motion, AnimatePresence } from "framer-motion";
+import { boolean } from "zod";
 
+interface CreateTeamModelProps {
+  isCreateOpen: boolean;
+  onClose: () => void;
+}
 
  
-export  function CreateTeamModal() {
+export  function CreateTeamModal({isCreateOpen, onClose}:CreateTeamModelProps) {
 
   const { 
 
-    isCreateOpen,
+    
     createName,
     createMemberEmail,
     createMemberRole,
     createError,
     createLoading,
 
-    setIsCreateOpen,
+    
     setCreateName,
     setCreateMemberEmail,
     setCreateMemberRole,
@@ -33,7 +38,7 @@ export  function CreateTeamModal() {
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center"
         >
-          <div className="absolute inset-0 bg-black/60" onClick={() => setIsCreateOpen(false)} />
+          <div className="absolute inset-0 bg-black/60" onClick={() => onClose()} />
 
           <motion.div
             initial={{ scale: 0.98, y: 10 }}
@@ -52,7 +57,7 @@ export  function CreateTeamModal() {
               </div>
               <button
                 className="rounded-xl border border-white/10 bg-white/5 p-2 hover:bg-white/10"
-                onClick={() => setIsCreateOpen(false)}
+                onClick={() => onClose()}
                 type="button"
                 aria-label="Close create team modal"
               >
@@ -101,7 +106,7 @@ export  function CreateTeamModal() {
                   type="button"
                   className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-white/10 disabled:opacity-60"
                   disabled={createLoading}
-                  onClick={() => setIsCreateOpen(false)}
+                  onClick={() => onClose()}
                 >
                   Cancel
                 </button>

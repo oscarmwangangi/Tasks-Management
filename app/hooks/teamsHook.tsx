@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 
 import { createTeam, deleteTeam, fetchTeams, addMemberToTeam, removeMemberFromTeam } from "@/app/actions/teamActions"
-import { useAuth } from "@/app/hooks/localStorage";
+
 
 
 type TeamMemberDTO = {
@@ -38,6 +38,9 @@ const CreateTeamSchema = z.object({
 });
 
 function initialsFromName(name: string) {
+  if(!name || typeof name !== "string"){
+    return "??"
+  }
   const parts = name.trim().split(/\s+/).slice(0, 2);
   return parts.map((p) => p[0]?.toUpperCase()).join("");
 }
@@ -63,7 +66,7 @@ export function TeamHooks() {
   const [memberAddRole, setMemberAddRole] = useState("member");
   const [memberError, setMemberError] = useState<string | null>(null);
 
-const { userId, user } = useAuth()
+
   const selectedTeam = useMemo(
     () => teams?.find((t) => t.id === selectedTeamId) ?? null,
     [teams, selectedTeamId]
@@ -120,7 +123,7 @@ const { userId, user } = useAuth()
       const created = await createTeam({
         name: parsed.data.name,
         initialMembers: parsed.data.initialMembers,
-          createdByUserId: userId ?? undefined
+       
       });
 
       const data = await fetchTeams();
@@ -169,7 +172,7 @@ const { userId, user } = useAuth()
         teamId: selectedTeamId,
         email: memberAddEmail.trim(),
         role: memberAddRole,
-        createdByUserId: userId ?? undefined
+       
       });
       const data = await fetchTeams();
       setTeams(data);
@@ -210,8 +213,7 @@ const { userId, user } = useAuth()
     memberAddEmail,
     memberAddRole,
     memberError,
-    userId,
-    user,
+
 
     
     setSearch,

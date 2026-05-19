@@ -2,7 +2,8 @@
 
 import { z } from "zod";
 import prisma from "@/lib/prisma";
-import { useAuth } from "../hooks/localStorage";
+import { auth } from "../middlware/auth";
+
 
 
 
@@ -17,9 +18,15 @@ export async function fetchTeams() {
         },
       },
       _count: { select: { tasks: true } },
+   
       tasks: {
-        where: { status: "done" },
-        select: { id: true },
+        select: { 
+          id: true, 
+          title: true, 
+          status: true, 
+          priority: true, 
+         
+        },
       },
     },
   });
@@ -44,7 +51,15 @@ export async function fetchTeams() {
       created_at: new Date().toISOString(),
     })),
     tasksCount: t._count.tasks,
-    completedTasksCount: t.tasks.length,
+    // 2.  Keep track of completed vs active if needed
+    completedTasksCount: t.tasks.filter(task => task.status === "done").length,
+    // 3. ADD THIS: Pass down the transformed task array
+    tasks: t.tasks.map((task) => ({
+      id: task.id,
+      title: task.title,
+      status: task.status,
+      priority: task.priority ?? "medium",
+    })),
   }));
 }
 
@@ -60,10 +75,10 @@ const CreateTeamSchema = z.object({
     .default([]),
 });
 
-export async function createTeam(params: z.infer<typeof CreateTeamSchema> & { createdByUserId?: string }) {
-
+export async function createTeam(params: z.infer<typeof CreateTeamSchema> & { }) {
+  const session = await auth()
   
-const userId = params.createdByUserId;
+  const userId = session?.user?.id;
   if (!userId) throw new Error("Missing createdByUserId");
 
   const parsed = CreateTeamSchema.safeParse(params);
@@ -120,8 +135,9 @@ const userId = params.createdByUserId;
   });
 }
 
-export async function deleteTeam(params: { teamId: string; createdByUserId?: string }) {
-  const userId = params.createdByUserId;
+export async function deleteTeam(params: { teamId: string;}) {
+  const session = await auth()
+  const userId = session?.user?.id;
   if (!userId) throw new Error("Missing createdByUserId");
 
   const team = await prisma.team.findUnique({ where: { id: params.teamId }, select: { created_by: true } });
@@ -131,8 +147,9 @@ export async function deleteTeam(params: { teamId: string; createdByUserId?: str
   await prisma.team.delete({ where: { id: params.teamId } });
 }
 
-export async function addMemberToTeam(params: { teamId: string; email: string; role: string; createdByUserId?: string }) {
-  const userId = params.createdByUserId;
+export async function addMemberToTeam(params: { teamId: string; email: string; role: string;  }) {
+  const session = await auth()
+  const userId = session?.user?.id;
   if (!userId) throw new Error("Missing createdByUserId");
 
   const team = await prisma.team.findUnique({ where: { id: params.teamId }, select: { created_by: true } });
@@ -153,9 +170,10 @@ export async function addMemberToTeam(params: { teamId: string; email: string; r
   } as any);
 }
 
-export async function removeMemberFromTeam(params: { teamId: string; userId: string; createdByUserId?: string }) {
-  const me = params.createdByUserId;
-  if (!me) throw new Error("Missing createdByUserId");
+export async function removeMemberFromTeam(params: { teamId: string; userId: string;  }) { 
+  const session = await auth()
+  const me = session?.user?.id;
+  if (!me) throw new Error("Missing createdByUserId")
 
   const team = await prisma.team.findUnique({ where: { id: params.teamId }, select: { created_by: true } });
   if (!team) throw new Error("Team not found");

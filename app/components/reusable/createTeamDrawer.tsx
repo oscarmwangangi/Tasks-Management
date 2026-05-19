@@ -9,10 +9,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import { TeamHooks } from "@/app/hooks/teamsHook";
 
 
-export function CreateTeamDrawer() {
+interface CreateTeamDrawerProps {
+  isDrawerOpen: boolean;
+  onClose: () => void;
+  selectedTeam: any,
+  initialsFromName:(name: string) => string;
+}
+interface Task {
+  id: string;
+  title: string;
+  status: string;
+  priority?: string;
+}
+
+export function CreateTeamDrawer({isDrawerOpen,selectedTeam ,initialsFromName,onClose }:CreateTeamDrawerProps, ) {
       const { 
-    selectedTeam,
-    isDrawerOpen,
+    
+    
     memberAddEmail,
     memberAddRole,
     memberError,
@@ -26,7 +39,7 @@ export function CreateTeamDrawer() {
     handleRemoveMember,
     
     // Utils
-    initialsFromName
+    
  }=TeamHooks()
     return <AnimatePresence>
       {selectedTeam && isDrawerOpen && (
@@ -66,7 +79,7 @@ export function CreateTeamDrawer() {
             </div>
 
             <button
-              onClick={() => setIsDrawerOpen(false)}
+              onClick={() => onClose()}
               className="rounded-2xl border border-white/10 bg-white/5 p-2 hover:bg-white/10"
               aria-label="Close team drawer"
             >
@@ -122,7 +135,7 @@ export function CreateTeamDrawer() {
 
                 <div className="max-h-64 overflow-auto">
                   {selectedTeam.members?.length ? (
-                    selectedTeam.members.map((m) => (
+                    selectedTeam.members.map((m:{ id: string; name: string; email: string; role: string; created_at: string; user_id: string }) => (
                       <div
                         key={m.id}
                         className="grid grid-cols-[1.4fr_1fr_0.8fr_auto] gap-3 px-4 py-3 border-b border-white/5 items-center hover:bg-white/5"
@@ -167,13 +180,65 @@ export function CreateTeamDrawer() {
           </div>
 
           {/* Tasks section scaffold (progressive enhancement) */}
+{/* Team Tasks Section */}
           <div className="mt-6">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold tracking-wide text-slate-200">Team Tasks</h4>
-              <span className="text-xs text-slate-400">(Coming soon)</span>
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
+              <h4 className="text-sm font-semibold tracking-wide text-slate-200">
+                Team Tasks ({selectedTeam?.tasks?.length ?? 0})
+              </h4>
+              <span className="text-xs text-emerald-400 font-medium">
+                {selectedTeam?.completedTasksCount ?? 0}/{selectedTeam?.tasksCount ?? 0} Done
+              </span>
             </div>
-            <div className="mt-4 rounded-2xl border border-white/10 bg-black/10 p-4 text-sm text-slate-400">
-              This page includes the Teams UI shell + members management. Tasks management (filters, drag-and-drop, assign) can be added next on top of the same backend pattern.
+
+            <div className="mt-4 max-h-60 overflow-auto flex flex-col gap-2.5 pr-1 custom-scrollbar">
+              {selectedTeam?.tasks?.length ? (
+                selectedTeam.tasks.map((task: Task) => (
+                  <div
+                    key={task.id}
+                    className="flex items-center justify-between rounded-2xl border border-white/5 bg-black/20 p-3.5 transition-all hover:bg-white/5"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      {/* Status Checkbox Indicator */}
+                      <div 
+                        className={`h-5 w-5 rounded-lg border flex items-center justify-center text-[10px] shrink-0 font-bold
+                          ${task.status === 'done' 
+                            ? 'border-emerald-500/50 bg-emerald-500/20 text-emerald-300' 
+                            : 'border-white/20 bg-white/5 text-transparent'
+                          }`}
+                      >
+                        ✓
+                      </div>
+                      
+                      {/* Task Title */}
+                      <span 
+                        className={`text-sm font-medium truncate ${
+                          task.status === 'done' ? 'line-through text-slate-500' : 'text-slate-200'
+                        }`}
+                      >
+                        {task.title}
+                      </span>
+                    </div>
+
+                    {/* Dynamic Status Badge */}
+                    <span 
+                      className={`text-[10px] px-2 py-0.5 rounded-md uppercase tracking-wider font-bold shrink-0 border
+                        ${task.status === 'done' 
+                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                          : task.status === 'in_progress' || task.status === 'active'
+                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                          : 'bg-white/5 text-slate-400 border-white/10'
+                        }`}
+                    >
+                      {task.status.replace('_', ' ')}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-2xl border border-dashed border-white/10 bg-black/10 p-6 text-center text-sm text-slate-500">
+                  No tasks assigned to this team yet.
+                </div>
+              )}
             </div>
           </div>
         </motion.aside>

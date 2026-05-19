@@ -8,6 +8,7 @@ import { tableData } from "@/app/services/tableData";
 export function useDashboardHooks(customPageSize:number) {
   const [stats, setStats] = useState<any>(null);
   const [priority, setPriority] = useState<any>(null);
+  
   const [table, setTable] = useState<{
     tasks: Task[];
     pagination: any;

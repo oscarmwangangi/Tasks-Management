@@ -1,4 +1,5 @@
-export function formatDateRange(start: Date, end: Date) {
+// Change the parameter types from 'Date' to 'Date | string'
+export function formatDateRange(start: Date | string, end: Date | string) {
   const s = new Date(start);
   const e = new Date(end);
 

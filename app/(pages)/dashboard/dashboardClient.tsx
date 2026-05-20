@@ -25,6 +25,7 @@ import { ChartCard } from "@/app/shared/ui/cardChart"
 import { PriorityBadge } from "@/app/shared/ui/priorityBadge";
 import { StatusBadge } from "@/app/shared/ui/statusBadge";
 import { formatDateRange } from "@/app/actions/formatDateRange";
+import { ReusableTable, Column } from "@/app/components/reusable/tableData";
 import { StatsCard } from "@/app/shared/ui/statsCard";
 
 ChartJS.register(RadialLinearScale, ArcElement, Tooltip, Legend);
@@ -33,8 +34,43 @@ interface DashboardClientProps {
   session: any;
 }
 
+interface Task {
+  id: string;
+  title: string;
+  priority: string;
+  status: string;
+  description: string | null;
+  start_date?: Date | null;
+  due_date?:  Date | null;
+}
 export default function DashboardClient({session}:DashboardClientProps) {
+  const taskColumns: Column<Task>[] = [
+    { header: "Task", render: (task) => task.title ? (
+        <span className="font-medium">{task.title}</span>
+          ) : (
+          <span className="text-slate-600 italic text-sm">N o title</span>
+        )
+      },
 
+    { header: "Priority", render: (task) => <PriorityBadge value={task.priority} /> },
+    { header: "Status", render: (task) => <StatusBadge value={task.status} /> },
+    { 
+      header: "Description", 
+      render: (task) => task.description ? (
+        <div className="max-w-75 truncate text-slate-300">{task.description}</div>
+      ) : (
+        <div className="text-slate-600 italic text-sm">No Description</div>
+      )
+    },
+    {
+      header: "Timeline",
+      render: (task) => task.start_date && task.due_date ? (
+        <span className="text-slate-400 text-sm">{formatDateRange(task.start_date, task.due_date)}</span>
+      ) : (
+        <span className="text-slate-600 italic text-sm">No date set</span>
+      )
+    }
+  ];
   const { 
     stats, loading, table, polarData, doughnutOptions,
     doughnutChartData, chartOptions, setPage 
@@ -183,93 +219,19 @@ export default function DashboardClient({session}:DashboardClientProps) {
       </div>
 
       {/* Table */}
-      <div className="mt-8 group rounded-3xl border border-white/5 bg-white/3 p-5 transition-all hover:border-emerald-500/20 hover:bg-white/5 hover:shadow-xl hover:shadow-black/20 overflow-hidden">
-        <div className="p-6 border-b border-white/10 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">
-            Recent Tasks
-          </h2>
+     <ReusableTable 
+      title="Recent Tasks"
+      data={table?.tasks}
+      columns={taskColumns}
+      pagination={table?.pagination}
+      onPageChange={setPage}
 
-          <span className="text-slate-400 text-sm">
-            {table?.pagination.totalItems} tasks
-          </span>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-225">
-            <thead className="bg-white/5">
-              <tr className="text-left text-slate-400 text-sm">
-                <th className="p-5">Task</th>
-                <th className="p-5">Priority</th>
-                <th className="p-5">Status</th>
-                <th className="p-5">Description</th>
-                <th className="p-5">Timeline</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {table?.tasks.map((task) => (
-                <tr
-                  key={task.id}
-                  className="border-t border-white/5 hover:bg-white/5 transition-all"
-                >
-                  <td className="p-5 font-medium">
-                    {task.title}
-                  </td>
-
-                  <td className="p-5">
-                    <PriorityBadge value={task.priority} />
-                  </td>
-
-                  <td className="p-5">
-                    <StatusBadge value={task.status} />
-                  </td>
-
-                  <td className="p-5 text-slate-300 max-w-75 truncate">
-                    {task.description}
-                  </td>
-
-                 <td className="p-5 text-slate-400 text-sm">
-                    {task.start_date && task.due_date ? (
-                        formatDateRange(task.start_date, task.due_date)
-                    ) : (
-                        <span className="text-slate-600 italic">No date set</span>
-                    )}
-                    </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="p-5 border-t border-white/10 flex items-center justify-between">
-          <p className="text-sm text-slate-400">
-            Page {table?.pagination.currentPage} of{" "}
-            {table?.pagination.totalPages}
-          </p>
-
-          <div className="flex gap-3">
-            <button
-              onClick={() =>
-                setPage((prev) => Math.max(prev - 1, 1))
-              }
-              disabled={!table?.pagination.hasPrevPage}
-              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 disabled:opacity-40"
-            >
-              Previous
-            </button>
-
-            <button
-              onClick={() => setPage((prev) => prev + 1)}
-              disabled={!table?.pagination.hasNextPage}
-              className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-medium disabled:opacity-40"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      </div>
+     
+     
+     />
     </div>
   );
+
+
 }
 

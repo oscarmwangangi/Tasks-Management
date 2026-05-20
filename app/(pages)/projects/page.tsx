@@ -10,14 +10,52 @@ import {
 import { useDashboardHooks } from "@/app/hooks/dashboardHooks";
 import { StatsCard } from "@/app/shared/ui/statsCard";
 import DashboardSkeleton from "@/app/features/dashboardSkeleton";
-
+import { PriorityBadge } from "@/app/shared/ui/priorityBadge";
+import { StatusBadge } from "@/app/shared/ui/statusBadge";
 import { useMemo, useState } from "react";
+import { Column , ReusableTable} from "@/app/components/reusable/tableData";
+import { formatDateRange } from "@/app/actions/formatDateRange";
 
-
+interface Task {
+  id: string;
+  title: string;
+  priority: string;
+  status: string;
+  description: string | null;
+  start_date?: Date | null;
+  due_date?:  Date | null;
+}
 export default function ProjectsPage() {
+  
+    const taskColumns: Column<Task>[] = [
+      { header: "Task", render: (task) => task.title ? (
+          <span className="font-medium">{task.title}</span>
+            ) : (
+            <span className="text-slate-600 italic text-sm">N o title</span>
+          )
+        },
+  
+      { header: "Priority", render: (task) => <PriorityBadge value={task.priority} /> },
+      { header: "Status", render: (task) => <StatusBadge value={task.status} /> },
+      { 
+        header: "Description", 
+        render: (task) => task.description ? (
+          <div className="max-w-75 truncate text-slate-300">{task.description}</div>
+        ) : (
+          <div className="text-slate-600 italic text-sm">No Description</div>
+        )
+      },
+      {
+        header: "Timeline",
+        render: (task) => task.start_date && task.due_date ? (
+          <span className="text-slate-400 text-sm">{formatDateRange(task.start_date, task.due_date)}</span>
+        ) : (
+          <span className="text-slate-600 italic text-sm">No date set</span>
+        )
+      }
+    ];
 
-
-  const { stats, loading } = useDashboardHooks(10);
+  const { stats, loading , table, setPage} = useDashboardHooks(10);
   const [isAddOpen, setIsAddOpen] = useState(false);
 
   const currentUserId = useMemo(() => {
@@ -147,13 +185,23 @@ export default function ProjectsPage() {
               <p className="mt-1 text-2xl font-bold">{stats?.doneTasks ?? 0}</p>
             </div>
           </div>
-
+{/* 
           <p className="mt-6 text-sm text-slate-400">
             This page reuses your existing dashboard stats to provide a fast
             Projects overview UI.
-          </p>
+          </p> */}
         </div>
       </div>
+                   <ReusableTable 
+                title="Recent Tasks"
+                data={table?.tasks}
+                columns={taskColumns}
+                pagination={table?.pagination}
+                onPageChange={setPage}
+
+              
+     
+     />
     </div>
   );
 }

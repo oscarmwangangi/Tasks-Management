@@ -53,7 +53,7 @@ export async function fetchTeams() {
     tasksCount: t._count.tasks,
     // 2.  Keep track of completed vs active if needed
     completedTasksCount: t.tasks.filter(task => task.status === "done").length,
-    // 3. ADD THIS: Pass down the transformed task array
+    //  Pass down the transformed task array
     tasks: t.tasks.map((task) => ({
       id: task.id,
       title: task.title,

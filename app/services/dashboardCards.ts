@@ -11,7 +11,7 @@ export async function getDashboardCards() {
         },
     });
 
-    // Initialize counts for the statuses you care about
+    // Initialize counts for the statuses 
     const counts = {
         total: 0,
         backlog: 0,

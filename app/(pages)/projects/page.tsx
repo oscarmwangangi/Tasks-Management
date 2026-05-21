@@ -13,7 +13,7 @@ import DashboardSkeleton from "@/app/features/dashboardSkeleton";
 import { PriorityBadge } from "@/app/shared/ui/priorityBadge";
 import { StatusBadge } from "@/app/shared/ui/statusBadge";
 import { useMemo, useState } from "react";
-import { Column , ReusableTable} from "@/app/components/reusable/tableData";
+import { Column , ReusableTable} from "@/app/components/reusable/ReusableTable";
 import { formatDateRange } from "@/app/actions/formatDateRange";
 
 interface Task {
@@ -22,6 +22,8 @@ interface Task {
   priority: string;
   status: string;
   description: string | null;
+  team?: {name: string}  | null ;
+  creator?: {  firstName: string; secondName:string } | null;
   start_date?: Date | null;
   due_date?:  Date | null;
 }
@@ -31,7 +33,7 @@ export default function ProjectsPage() {
       { header: "Task", render: (task) => task.title ? (
           <span className="font-medium">{task.title}</span>
             ) : (
-            <span className="text-slate-600 italic text-sm">N o title</span>
+            <span className="text-slate-600 italic text-sm">No title</span>
           )
         },
   
@@ -44,6 +46,23 @@ export default function ProjectsPage() {
         ) : (
           <div className="text-slate-600 italic text-sm">No Description</div>
         )
+      },
+      {
+          header: "Team",
+          render: (task) => task.team?.name ? (
+            <span className="text-slate-300 text-sm">{task.team.name}</span>
+          ) : (
+            <div className="text-slate-600 italic text-sm">No team assigned</div>
+          )
+      },
+      {
+        header:"Created by",
+        render:(task) => task.creator ? (
+          <span className="text-slate-300 text-sm">{task.creator.firstName} {task.creator?.secondName}</span>
+        ) : (
+          <span  className="text-slate-600 italic text-sm">Null</span>
+        )
+
       },
       {
         header: "Timeline",
@@ -185,19 +204,15 @@ export default function ProjectsPage() {
               <p className="mt-1 text-2xl font-bold">{stats?.doneTasks ?? 0}</p>
             </div>
           </div>
-{/* 
-          <p className="mt-6 text-sm text-slate-400">
-            This page reuses your existing dashboard stats to provide a fast
-            Projects overview UI.
-          </p> */}
+
         </div>
       </div>
                    <ReusableTable 
-                title="Recent Tasks"
-                data={table?.tasks}
-                columns={taskColumns}
-                pagination={table?.pagination}
-                onPageChange={setPage}
+                      title="Recent Tasks"
+                      data={table?.tasks}
+                      columns={taskColumns}
+                      pagination={table?.pagination}
+                      onPageChange={setPage}
 
               
      

@@ -1,7 +1,3 @@
-import { useDashboardHooks } from "@/app/hooks/dashboardHooks";
-import { PriorityBadge } from "@/app/shared/ui/priorityBadge";
-import { StatusBadge } from "@/app/shared/ui/statusBadge";
-import { formatDateRange } from "@/app/actions/formatDateRange";
 
  export interface Column<T>{
     header: string,

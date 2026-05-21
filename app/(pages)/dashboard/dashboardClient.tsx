@@ -25,7 +25,7 @@ import { ChartCard } from "@/app/shared/ui/cardChart"
 import { PriorityBadge } from "@/app/shared/ui/priorityBadge";
 import { StatusBadge } from "@/app/shared/ui/statusBadge";
 import { formatDateRange } from "@/app/actions/formatDateRange";
-import { ReusableTable, Column } from "@/app/components/reusable/tableData";
+import { ReusableTable, Column } from "@/app/components/reusable/ReusableTable";
 import { StatsCard } from "@/app/shared/ui/statsCard";
 
 ChartJS.register(RadialLinearScale, ArcElement, Tooltip, Legend);

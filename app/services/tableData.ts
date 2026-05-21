@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 
+
 export async function tableData(page: number = 1, pageSize: number = 10) {
     const skip = (page - 1) * pageSize;
 
@@ -24,7 +25,15 @@ export async function tableData(page: number = 1, pageSize: number = 10) {
                 take: pageSize,
                 orderBy: {
                     created_at: 'desc'
-                }
+                },
+                include: {
+                    team: {
+                        select: { name: true },
+                    },
+                    creator:{
+                        select: { firstName: true, secondName: true},
+                    },
+                },
             }),
             // 3. Total Count for Pagination Logic
             prisma.task.count()
@@ -44,5 +53,24 @@ export async function tableData(page: number = 1, pageSize: number = 10) {
     } catch (error) {
         console.error("Dashboard Data Error:", error);
         throw new Error("Failed to fetch dashboard data");
+    }
+}
+
+export async function deleteTask(id:string){
+
+    
+    try{
+        const deleteTask = prisma.task.delete({
+           where:{
+            id:id,
+           },
+        })
+         return {success:true, message:"Deleted Sucessfull",deleteTask}
+
+    }
+    catch (error){
+        console.error("Delete Task Error:", error);
+        throw new Error("Failed to delete task. It might not exist.");
+
     }
 }

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useActionState , useEffect} from "react";
-import { useAuth } from "@/app/hooks/localStorage";
 import { createTask, ActionResult } from "./taskAction"; 
 import { TeamHooks } from "@/app/hooks/teamsHook";
 

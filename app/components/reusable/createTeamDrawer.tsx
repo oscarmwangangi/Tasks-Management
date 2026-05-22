@@ -7,6 +7,7 @@ import {
 
 import { motion, AnimatePresence } from "framer-motion";
 import { TeamHooks } from "@/app/hooks/teamsHook";
+import { refresh } from "next/cache";
 
 
 interface CreateTeamDrawerProps {
@@ -37,6 +38,7 @@ export function CreateTeamDrawer({isDrawerOpen,selectedTeam ,initialsFromName,on
 
     handleAddMember,
     handleRemoveMember,
+    refresh
     
     // Utils
     
@@ -117,6 +119,7 @@ export function CreateTeamDrawer({isDrawerOpen,selectedTeam ,initialsFromName,on
                   <Plus className="inline-block h-4 w-4 mr-2" />
                   Add
                 </button>
+             
               </div>
 
               {memberError && (

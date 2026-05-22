@@ -15,6 +15,10 @@ import { StatusBadge } from "@/app/shared/ui/statusBadge";
 import { useMemo, useState } from "react";
 import { Column , ReusableTable} from "@/app/components/reusable/ReusableTable";
 import { formatDateRange } from "@/app/actions/formatDateRange";
+import { DashboardTask } from "@/app/services/tableData";
+import { deleteTask } from "@/app/services/tableData";
+import { UpdateTaskModal } from "@/app/components/reusable/UpdateTaskModal";
+
 
 interface Task {
   id: string;
@@ -28,7 +32,7 @@ interface Task {
   due_date?:  Date | null;
 }
 export default function ProjectsPage() {
-  
+
     const taskColumns: Column<Task>[] = [
       { header: "Task", render: (task) => task.title ? (
           <span className="font-medium">{task.title}</span>
@@ -71,23 +75,40 @@ export default function ProjectsPage() {
         ) : (
           <span className="text-slate-600 italic text-sm">No date set</span>
         )
-      }
+      },
+      {
+    header: "Actions",
+    render: (item) => {
+      const task = item as DashboardTask; // Tell TypeScript this row is a DashboardTask
+      return (
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => openUpdateModal(task)} // Tracks this task's ID for updating
+            className="text-xs px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => openDeleteModal(task)} // Tracks this task's ID for deleting
+            className="text-xs px-3 py-1.5 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-300 hover:bg-rose-500/20"
+          >
+            Delete
+          </button>
+        </div>
+      );
+    }
+  }
     ];
 
-  const { stats, loading , table, setPage} = useDashboardHooks(10);
+  const { stats, loading , table, setPage,         selectedTask,
+    isUpdateModalOpen,
+    setIsUpdateModalOpen,
+    isDeleteModalOpen,
+    setIsDeleteModalOpen,
+    openUpdateModal,
+    openDeleteModal, refresh} = useDashboardHooks(10);
   const [isAddOpen, setIsAddOpen] = useState(false);
 
-  const currentUserId = useMemo(() => {
-    if (typeof window === "undefined") return null;
-    try {
-      const raw = localStorage.getItem("user");
-      if (!raw) return null;
-      const parsed = JSON.parse(raw) as { userId?: string };
-      return parsed?.userId ?? null;
-    } catch {
-      return null;
-    }
-  }, [isAddOpen]);
 
 
   if (loading && !stats) {
@@ -207,16 +228,49 @@ export default function ProjectsPage() {
 
         </div>
       </div>
-                   <ReusableTable 
-                      title="Recent Tasks"
-                      data={table?.tasks}
-                      columns={taskColumns}
-                      pagination={table?.pagination}
-                      onPageChange={setPage}
+    <ReusableTable 
+      title="Recent Tasks"
+      data={table?.tasks}
+      columns={taskColumns}
+      pagination={table?.pagination}
+      onPageChange={setPage}
 
               
      
      />
+    {isUpdateModalOpen && selectedTask && (
+      <UpdateTaskModal 
+        task={selectedTask}
+        onClose={() => setIsUpdateModalOpen(false)}
+        refresh={refresh}
+      />
+    )}
+
+    {/* 2. Delete Confirmation Modal Context */}
+    {isDeleteModalOpen && selectedTask && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div className="w-full max-w-md bg-slate-900 border border-white/10 rounded-3xl p-6" role="dialog" aria-modal="true">
+          <h2 className="text-lg font-bold text-rose-400">Delete Task</h2>
+          <p className="text-sm text-slate-400 mt-2">
+            Are you sure you want to permanently delete <strong>"{selectedTask.title}"</strong>?
+          </p>
+          
+          <div className="flex justify-end gap-3 mt-6">
+            <button className="px-4 py-2 text-sm bg-white/5 rounded-xl" onClick={() => setIsDeleteModalOpen(false)}>Cancel</button>
+            <button 
+              className="px-4 py-2 text-sm bg-rose-600 text-white font-semibold rounded-xl" 
+              onClick={async () => {
+                await deleteTask(selectedTask.id); // Uses tracked ID to run the SQL delete query
+                setIsDeleteModalOpen(false);
+                refresh(); // Instantly removes row from UI and updates analytics graphs
+              }}
+            >
+              Yes, Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     </div>
   );
 }

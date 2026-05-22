@@ -235,6 +235,7 @@ export function TeamHooks() {
     
     // Utils
     initialsFromName,
+    refresh: handleAddMember,
   };
 
 }

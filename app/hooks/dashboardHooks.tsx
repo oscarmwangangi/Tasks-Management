@@ -4,6 +4,7 @@ import { Task } from "@prisma/client";
 import { getDashboardCards } from "@/app/services/dashboardCards";
 import { doughnutData } from "@/app/services/doughnutData";
 import { tableData } from "@/app/services/tableData";
+import { DashboardTask } from "@/app/services/tableData";
 
 export function useDashboardHooks(customPageSize:number) {
   const [stats, setStats] = useState<any>(null);
@@ -16,6 +17,23 @@ export function useDashboardHooks(customPageSize:number) {
 
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+
+  const [selectedTask, setSelectedTask] = useState<DashboardTask | null>(null);
+  
+  // Modal visibility flags
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // Helper functions that lock in the exact row ID and pop open the modal
+  const openUpdateModal = (task: DashboardTask) => {
+    setSelectedTask(task);
+    setIsUpdateModalOpen(true);
+  };
+
+  const openDeleteModal = (task: DashboardTask) => {
+    setSelectedTask(task);
+    setIsDeleteModalOpen(true);
+  };
 
   async function loadDashboard() {
     const size = customPageSize || 5;
@@ -147,6 +165,14 @@ export function useDashboardHooks(customPageSize:number) {
     doughnutChartData,
     chartOptions,
     doughnutOptions,
+    selectedTask,
+    isUpdateModalOpen,
+    setIsUpdateModalOpen,
+    isDeleteModalOpen,
+    setIsDeleteModalOpen,
+    openUpdateModal,
+    openDeleteModal,
+    
     refresh: loadDashboard, // Helper to manually refresh data
   };
 }

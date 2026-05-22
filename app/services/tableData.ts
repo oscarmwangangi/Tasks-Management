@@ -1,7 +1,13 @@
 "use server"
-
+import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 
+export type DashboardTask = Prisma.TaskGetPayload<{
+  include: {
+    team: { select: { name: true } };
+    creator: { select: { firstName: true; secondName: true } };
+  };
+}>;
 
 export async function tableData(page: number = 1, pageSize: number = 10) {
     const skip = (page - 1) * pageSize;
@@ -72,5 +78,21 @@ export async function deleteTask(id:string){
         console.error("Delete Task Error:", error);
         throw new Error("Failed to delete task. It might not exist.");
 
+    }
+}
+
+export async function updateTask(id: string, data: Prisma.TaskUpdateInput) {
+    try {
+        const updatedTask = await prisma.task.update({
+            where: {
+                id: id,
+            },
+            data: data,
+        });
+
+        return { success: true, message: "Updated Successfully", updatedTask };
+    } catch (error) {
+        console.error("Update Task Error:", error);
+        return { success: false, message: "Failed to update task." };
     }
 }

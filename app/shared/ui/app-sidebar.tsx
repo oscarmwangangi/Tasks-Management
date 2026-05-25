@@ -5,11 +5,10 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarHeader,
-} from "../../shared/ui/sidebar"
-import { Settings, LayoutDashboard,ListTodo, Users,  FolderKanban, } from "lucide-react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+} from "../../components/reusable/sidebar"
+import { Settings, LayoutDashboard,ListTodo, Users,  FolderKanban, ChevronDown, ChevronRight, CalendarDays } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Dropdown } from "./dropdown"
+import { Dropdown } from "../../components/reusable/dropdown"
 import { handleServerLogout } from "@/app/actions/logout";
 export function AppSidebar() {
   const router = useRouter();
@@ -53,6 +52,9 @@ const handleLogout = async () => {
           Projects
         </SidebarGroup>
 
+        <SidebarGroup to="/calender" icon={CalendarDays}>
+          Calender
+        </SidebarGroup>
 
         <SidebarGroup to="/settings" icon={Settings}>
           Settings

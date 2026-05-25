@@ -2,7 +2,7 @@
 import { useDashboardHooks } from "../../hooks/dashboardHooks";
 import  DashboardSkeleton  from "@/app/features/dashboardSkeleton"
 import { BiBell } from "react-icons/bi";
-import { SidebarTrigger } from "@/app/shared/ui/sidebar";
+import { SidebarTrigger } from "@/app/components/reusable/sidebar";
 import Image from "next/image";
 import OscarCartoon2 from "@/app/assets/OscarCartoon.png";
 import {

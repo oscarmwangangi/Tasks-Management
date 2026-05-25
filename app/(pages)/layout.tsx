@@ -1,6 +1,6 @@
 import { auth } from "@/app/middlware/auth"; 
-import { SidebarProvider } from "@/app/shared/ui/sidebar"; 
-import { AppSidebar } from "@/app/components/reusable/app-sidebar";
+import { SidebarProvider } from "@/app/components/reusable/sidebar"; 
+import { AppSidebar } from "@/app/shared/ui/app-sidebar";
 
 interface LayoutProps {
   children: React.ReactNode;

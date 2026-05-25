@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SidebarGroup } from "../../shared/ui/sidebar";
+import { SidebarGroup } from "./sidebar";
 
 type Props = {
   OpenIcon: React.ElementType;

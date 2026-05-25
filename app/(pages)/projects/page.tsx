@@ -29,6 +29,7 @@ interface Task {
   team?: {name: string}  | null ;
   creator?: {  firstName: string; secondName:string } | null;
   start_date?: Date | null;
+  end_date?: Date | null;
   due_date?:  Date | null;
 }
 export default function ProjectsPage() {
@@ -70,8 +71,8 @@ export default function ProjectsPage() {
       },
       {
         header: "Timeline",
-        render: (task) => task.start_date && task.due_date ? (
-          <span className="text-slate-400 text-sm">{formatDateRange(task.start_date, task.due_date)}</span>
+        render: (task) => task.start_date && task.end_date ? (
+          <span className="text-slate-400 text-sm">{formatDateRange(task.start_date, task.end_date)}</span>
         ) : (
           <span className="text-slate-600 italic text-sm">No date set</span>
         )

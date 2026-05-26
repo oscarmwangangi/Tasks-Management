@@ -2,7 +2,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import React, { createContext, useContext, useState, useEffect } from "react"
-import { Menu, X } from "lucide-react" // Import icons
+import { Menu, X,PanelLeftOpen, PanelLeftClose } from "lucide-react" // Import icons
 import { LogOut } from "lucide-react"
 
 /* ========================================
@@ -28,19 +28,18 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
 
   // Handle screen resizing for responsiveness
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768
+      setIsMobile(mobile)
+      if (mobile) setOpen(false)
+    }
     checkMobile()
     window.addEventListener("resize", checkMobile)
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
-  // Auto-close sidebar on mobile by default
-  useEffect(() => {
-    if (isMobile) setOpen(false)
-    else setOpen(true)
-  }, [isMobile])
-
   return (
+
     <SidebarContext.Provider value={{ open, setOpen, isMobile }}>
       <div className="flex min-h-screen w-full">
         {children}
@@ -68,9 +67,11 @@ export function Sidebar({ children, className = "" }: { children: React.ReactNod
       <aside
         className={`
           fixed top-0 left-0 z-50
-          h-screen bg-gray-900 text-white
-          transition-all duration-300 ease-in-out
+          h-screen bg-[#020617] border-r border-slate-800/60 text-slate-300 
+      transition-all duration-300 ease-in-out
           ${open ? "w-64 translate-x-0" : "w-64 -translate-x-full md:w-20 md:translate-x-0"}
+
+
           ${className}
         `}
       >
@@ -96,10 +97,10 @@ export function SidebarTrigger() {
   return (
     <button
       onClick={() => setOpen(!open)}
-      className="p-2 rounded-md hover:bg-gray-100 transition-colors m-2 border"
-      aria-label="Toggle Sidebar w-fit hidden"
+      className="text-text-muted hover:bg-white/5 hover:text-taupe-100"
+  aria-label="Toggle Sidebar"
     >
-      {open ? <X size={20} /> : <Menu size={20} />}
+      {open ? <PanelLeftClose size={20} /> : <PanelLeftOpen size={20} />}
     </button>
   )
 }
@@ -134,11 +135,12 @@ export function SidebarGroup({
     <Link
       href={to}
       title={!open ? String(children) : ""}
-      className={`
-        flex items-start transition-all duration-300 ease-in-out
+          className={`
+            flex items-start transition-all duration-300 ease-in-out
+        
         ${isActive
-          ? "bg-blue-600 text-white"
-          : "text-gray-400 hover:bg-gray-800 hover:text-white"
+          ? "bg-(--color-accent) text-white"
+          : "text-text-muted hover:bg-white/5 hover:text-taupe-100"
         }
 
         ${open

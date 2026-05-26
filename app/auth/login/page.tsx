@@ -10,15 +10,15 @@ export default function LoginPage() {
 
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center -mt-16">
-            <h1 className="text-4xl font-bold mb-8 font-(family-name:--font-geist-sans text-[#333333]">
+        <div className="min-h-screen bg-bg text-text-primary flex flex-col items-center justify-center  dark">
+            <h1 className="text-4xl font-bold mb-8 font-(family-name:--font-geist-sans text-[#333333] text-text-primary">
                 Login
             </h1>
 
             {step === "login" && (
                 
             
-            <form action={formAction} className="bg-white p-6 rounded shadow-md w-full max-w-sm">
+            <form action={formAction} className="bg-(--color-surface) p-6 rounded shadow-md w-full max-w-sm border border-(--color-border)">
                 {state.message && (
                     <div className={`mb-4 text-sm ${state.success ? "text-green-500" : "text-red-500"}`}>
                         {state.message}
@@ -31,7 +31,7 @@ export default function LoginPage() {
                     <Field id="password" name="password" type="password" label="Password" placeholder="Min. 8 characters" />
                         </div>
                         <button 
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit"
+                        className="bg-(--color-accent) hover:bg-(--color-accent-hover) text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                         disabled={pending}
                         
                         >
@@ -59,7 +59,7 @@ export default function LoginPage() {
 
                                 <button type="submit"
                                 disabled={verifyPending}
-                                className={`mt-1 w-full rounded-lg hover:bg-(--color-accent-hover) active:scale-[0.98] transition-all text-white font-medium py-2.5 text-sm disabled:opacity-60 disabled:cursor-not-allowed ${verifyPending ? "opacity-60 cursor-not-allowed" : "hover:bg-blue-600"}`}
+className={`mt-1 w-full rounded-lg hover:bg-(--color-accent-hover) active:scale-[0.98] transition-all text-white font-medium py-2.5 text-sm disabled:opacity-60 disabled:cursor-not-allowed ${verifyPending ? "opacity-60 cursor-not-allowed" : "hover:bg-(--color-accent-hover)"}`}
                                 >{
                                     verifyPending ? (
                                         <span className="flex items-center justify-center gap-2">
@@ -73,7 +73,7 @@ export default function LoginPage() {
                                 
                             </form>
                         )}
-                        <span className="text-sm text-gray-600 mt-4">
+                        <span className="text-sm text-(--color-text-muted) mt-4">
                             Don't have an account? <a href="/auth/register" className="text-blue-500 hover:text-blue-700">Register here</a>
                         </span>
                         </div>

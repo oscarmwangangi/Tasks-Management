@@ -10,6 +10,7 @@ import { Settings, LayoutDashboard,ListTodo, Users,  FolderKanban, ChevronDown, 
 import { useRouter } from "next/navigation";
 import { Dropdown } from "../../components/reusable/dropdown"
 import { handleServerLogout } from "@/app/actions/logout";
+import { SidebarTrigger } from "@/app/components/reusable/sidebar";
 export function AppSidebar() {
   const router = useRouter();
 
@@ -27,6 +28,9 @@ const handleLogout = async () => {
     <Sidebar>
       <SidebarHeader>
         Task Manager
+                    <div className="">
+                    <SidebarTrigger />
+                    </div>
       </SidebarHeader>
 
       <SidebarContent>

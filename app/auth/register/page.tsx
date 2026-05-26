@@ -43,7 +43,8 @@ export default function RegisterPage() {
   }, [verifyState, router]);
   
   return (
-     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center -mt-16">
+     <div className="min-h-screen bg-(--color-bg) text-(--color-text-primary) flex flex-col items-center justify-center  dark">
+
 
       {/* ── Logo / Brand ── */}
       <div className="mb-8 flex flex-col items-center gap-2">
@@ -103,7 +104,7 @@ export default function RegisterPage() {
         {/* ── Step: Verify OTP ── */}
         {step === "verify" && (
           <>
-            <h1 className="mt-6 text-2xl font-semibold text-text-primary tracking-tight">
+              <h1 className="mt-6 text-2xl font-semibold text-(--color-text-primary) tracking-tight">
               Check your inbox
             </h1>
             <p className="mt-1 text-sm text-text-muted">

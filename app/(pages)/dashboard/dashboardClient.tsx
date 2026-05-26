@@ -91,11 +91,6 @@ export default function DashboardClient({session}:DashboardClientProps) {
         <div className="relative z-10 flex flex-col">
         <div className="flex items-center gap-4">
             
-            {/* Sidebar Trigger */}
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-[#0f172a]/70 hover:bg-[#1e293b] transition-all">
-            <SidebarTrigger />
-            </div>
-
             <div>
             <h1 className="text-3xl font-bold tracking-tight text-white">
                 Dashboard

@@ -80,7 +80,7 @@ export default function ProjectsPage() {
       {
     header: "Actions",
     render: (item) => {
-      const task = item as DashboardTask; // Tell TypeScript this row is a DashboardTask
+      const task = item as DashboardTask; 
       return (
         <div className="flex items-center gap-3">
           <button
@@ -229,16 +229,16 @@ export default function ProjectsPage() {
 
         </div>
       </div>
-    <ReusableTable 
-      title="Recent Tasks"
-      data={table?.tasks}
-      columns={taskColumns}
-      pagination={table?.pagination}
-      onPageChange={setPage}
+        <ReusableTable 
+          title="Recent Tasks"
+          data={table?.tasks}
+          columns={taskColumns}
+          pagination={table?.pagination}
+          onPageChange={setPage}
 
-              
-     
-     />
+                  
+        
+        />
     {isUpdateModalOpen && selectedTask && (
       <UpdateTaskModal 
         task={selectedTask}

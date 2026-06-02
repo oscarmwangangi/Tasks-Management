@@ -49,6 +49,7 @@ model User {
   created_at    DateTime       @default(now())
   accounts      Account[]
   sessions      Session[]
+  reminderEnable Boolean  @default(true)
 
   // Relations
   teamsCreated  Team[]         @relation("TeamCreator")

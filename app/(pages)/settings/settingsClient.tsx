@@ -5,7 +5,7 @@ import { Settings, Bell, Shield, LogOut } from "lucide-react";
 import { handleServerLogout } from "@/app/actions/logout";
 import { z } from "zod";
 import { changePassword } from "@/app/actions/userActions";
-
+import { toggleRemindersAction } from "@/app/actions/reminder";
 
 type ToggleOption = {
   id: string;
@@ -52,6 +52,9 @@ export default function SettingsClient({session}:SettingsClientProps) {
   const [changePasswordError, setChangePasswordError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [ isReminderEnabled, setIsReminderEnabled ] = useState(false);
+  const [reminderLoading, setReminderLoading] = useState(false);
+
 
    async function validatePassword() {
 
@@ -112,9 +115,24 @@ const emailAndName = useMemo(() => {
 
   const [logoutPending, setLogoutPending] = useState(false);
 
-  const handleToggle = (id: string) => {
+  const handleToggle = async (id: string) => {
+    setReminderLoading(true);
     setPrefs((prev) => ({ ...prev, [id]: !prev[id] }));
+    if(id === "taskReminders"){
+
+      const result = await toggleRemindersAction(isReminderEnabled);
+      if(result.success){
+        setIsReminderEnabled(result.newStatus);
+
+
+      }else{
+        alert("Something went wrong updating your settings.");
+      }
+      setReminderLoading(false);
+    }
   };
+
+
 
   const handleLogout = async () => {
     try {

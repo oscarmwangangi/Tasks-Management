@@ -13,7 +13,7 @@ interface PaginationData {
 }
 
 interface ReusableTableProps<T>{
-    title:String,
+    title:string,
     data: T[] | undefined,
     columns:Column<T>[],
     pagination?: PaginationData;

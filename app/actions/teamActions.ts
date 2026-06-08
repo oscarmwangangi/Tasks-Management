@@ -199,7 +199,7 @@ export async function fetchTeamMembers(teamId?:string){
         },
       }
     })
-    return members.map((member) => {
+    return members.map((member:any) => {
     const { user, ...memberDetails } = member;
     return {
       ...memberDetails,

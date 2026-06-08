@@ -88,7 +88,7 @@ export async function createTeam(params: z.infer<typeof CreateTeamSchema> & { })
   const existing = await prisma.team.findFirst({ where: { name: parsed.data.name } });
   if (existing) throw new Error("A team with this name already exists");
 
-  return prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx:any) => {
     const team = await tx.team.create({
       data: {
         name: parsed.data.name,
@@ -102,7 +102,7 @@ export async function createTeam(params: z.infer<typeof CreateTeamSchema> & { })
       ? await tx.user.findMany({ where: { email: { in: emails } }, select: { id: true, email: true } })
       : [];
 
-    const userIds = users.map((u) => u.id);
+    const userIds = users.map((u:any) => u.id);
 
     if (userIds.length) {
       // Add initial members with provided role (best effort)
@@ -110,8 +110,8 @@ export async function createTeam(params: z.infer<typeof CreateTeamSchema> & { })
       const roleByEmail = new Map(parsed.data.initialMembers.map((m) => [m.email.trim().toLowerCase(), m.role]));
 
       await tx.teamMember.createMany({
-        data: userIds.map((id) => {
-          const user = users.find((u) => u.id === id)!;
+        data: userIds.map((id:any) => {
+          const user = users.find((u:any) => u.id === id)!;
           return {
             team_id: team.id,
             user_id: id,

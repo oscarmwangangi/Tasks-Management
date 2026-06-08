@@ -38,17 +38,36 @@ export async function GET(request: Request) {
           gte: new Date(),
           lte: threeDaysFromNow,
         },
-        assignee: {
-          reminderEnable: true, // Filters out tasks for users with reminders disabled
-        },
-      },
+assignedMembers: {
+      some: {
+        teamMember: {
+          user: {
+            reminderEnable: true,
+          }
+        }
+      }
+    }
+  },
+  include: {
+    // Dig deep into the relation tree: Task -> TaskAssignment -> TeamMember -> User
+    assignedMembers: {
       include: {
-        assignee: {
-          select: { firstName: true, email: true, reminderEnable: true },
-        },
-      },
-    });
+        teamMember: {
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                email: true,
+                reminderEnable: true,
+              }
+            }
+          }
+        }
+      }
+    }
+  },
 
+  });
     // 3. If everything is running smoothly, terminate early
     if (upcomingRiskyTasks.length === 0) {
       return NextResponse.json({ message: "No high-risk deadlines found today." });
@@ -60,11 +79,16 @@ export async function GET(request: Request) {
       { firstName: string; tasks: typeof upcomingRiskyTasks }
     > = {};
 
-    for (const task of upcomingRiskyTasks) {
-      const email = task.assignee?.email;
-      const firstName = task.assignee?.firstName || "Developer";
+for (const task of upcomingRiskyTasks) {
+  // Loop through all members assigned to this specific task
+  for (const assignment of task.assignedMembers) {
+    const user = assignment.teamMember.user;
 
-      if (!email) continue;
+   // Skip if there's no user, or if they explicitly turned off reminders
+    if (!user || !user.email || !user.reminderEnable) continue;
+
+    const email = user.email;
+    const firstName = user.firstName || "Developer";
 
       if (!tasksByUser[email]) {
         tasksByUser[email] = {
@@ -96,7 +120,7 @@ export async function GET(request: Request) {
 
       // Send the email to the specific user dynamic email picked from the database
       await transporter.sendMail({
-        from: process.env.EMAIL_USER,
+        from: process.env.EMAIL_FROM,
         to: userEmail,
         subject: ` TaskFlow Reminder: You have ${data.tasks.length} tasks due soon`,
         html: `
@@ -119,7 +143,7 @@ export async function GET(request: Request) {
       success: true,
       tasksAnalyzed: upcomingRiskyTasks.length,
     });
-  } catch (error) {
+  }} catch (error) {
     console.error("AI Agent Error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

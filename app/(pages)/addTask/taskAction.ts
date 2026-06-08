@@ -23,6 +23,7 @@ const session = await auth()
   const end_date = (formData.get("end_date") as string | null)?.trim() ?? "";
   const is_favorite = formData.get("is_favorite") === "on"; // Checkboxes send "on" if checked
   const team_id = (formData.get("team_id") as string | null)?.trim() ?? null;
+  const teamMemberIds = formData.getAll("team_member_ids") as string[];
 
   const userId = session?.user?.id;
 
@@ -47,7 +48,12 @@ const session = await auth()
         end_date: end_date ? new Date(end_date) : null,
         is_favorite,
         created_by: userId || null,
-        team_id: team_id || null
+        team_id: team_id || null,
+        assignedMembers: {
+        create: teamMemberIds.map((memberId) => ({
+          team_member_id: memberId,
+        })),
+      },
       }
     });
 

@@ -41,7 +41,7 @@ interface Task {
   status: string;
   description: string | null;
   start_date?: Date | null;
-  due_date?:  Date | null;
+  end_date?:  Date | null;
 }
 export default function DashboardClient({session}:DashboardClientProps) {
   const taskColumns: Column<Task>[] = [
@@ -64,8 +64,8 @@ export default function DashboardClient({session}:DashboardClientProps) {
     },
     {
       header: "Timeline",
-      render: (task) => task.start_date && task.due_date ? (
-        <span className="text-slate-400 text-sm">{formatDateRange(task.start_date, task.due_date)}</span>
+      render: (task) => task.start_date && task.end_date ? (
+        <span className="text-slate-400 text-sm">{formatDateRange(task.start_date, task.end_date)}</span>
       ) : (
         <span className="text-slate-600 italic text-sm">No date set</span>
       )
@@ -202,15 +202,18 @@ export default function DashboardClient({session}:DashboardClientProps) {
       {/* Charts */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-8">
         <ChartCard title="Task Status">
-          <PolarArea data={polarData} options={chartOptions} />
-        </ChartCard>
+    {/* Explicit height wrapper */}
+    <div className="h-80 w-full relative">
+      <PolarArea data={polarData} options={chartOptions} />
+    </div>
+  </ChartCard>
 
-        <ChartCard title="Task Priority">
-           <Doughnut
-              data={doughnutChartData}
-              options={doughnutOptions}
-        />
-        </ChartCard>
+  <ChartCard title="Task Priority">
+    {/* Explicit height wrapper */}
+    <div className="h-80 w-full relative">
+      <Doughnut data={doughnutChartData} options={doughnutOptions} />
+    </div>
+  </ChartCard>
       </div>
 
       {/* Table */}

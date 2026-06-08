@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useActionState , useEffect} from "react";
+import { useState, useActionState , useEffect, useTransition} from "react";
 import { createTask, ActionResult } from "./taskAction"; 
 import { TeamHooks } from "@/app/hooks/teamsHook";
-
+import { fetchTeamMembers } from "@/app/actions/teamActions"
 
 const initialTaskState ={
   title: "",
@@ -14,16 +14,30 @@ const initialTaskState ={
   end_date: "",
   is_favorite: false,
   team_id: "",
+  teamMember:""
+}
+
+interface TeamMember{
+    userId: string;
+    firstName: string;
+    secondName: string;
+    id: string;
+    
+    
 }
 export default function AddTask() {
   
   
-  const [state, formAction, isPending] = useActionState<ActionResult | null, FormData>(
+  const [state, formAction,] = useActionState<ActionResult | null, FormData>(
     createTask, 
     null
   );
 
   const [task, setTask] = useState(initialTaskState);
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+const [members, setMembers] = useState<TeamMember[]>([]);
+  const [isPending, startTransition] = useTransition();
+
 
   const {  filteredTeams }=TeamHooks()
   useEffect(() => {
@@ -34,6 +48,30 @@ export default function AddTask() {
         
       }
     }, [state]);
+
+const handleTeamChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedTeamId = e.target.value;
+    
+    // 1. Update the local form state for the selected team
+    setTask(prev => ({ ...prev, team_id: selectedTeamId, teamMember: "" }));
+
+    // 2. If they cleared the selection, clear the members list and back out
+    if (!selectedTeamId) {
+      setMembers([]);
+      return;
+    }
+
+    // 3. Trigger the Server Action directly inside a transition block
+    startTransition(async () => {
+      try {
+        const teamMembers = await fetchTeamMembers(selectedTeamId);
+        setMembers(teamMembers);
+      } catch (error) {
+        console.error("Failed to load team members:", error);
+      }
+    });
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     setTask((prev) => ({
@@ -41,7 +79,17 @@ export default function AddTask() {
       [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }));
   };
+const handleMemberChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  // Convert HTML5 selected options collection into a clean array of strings
+  const values = Array.from(e.target.selectedOptions, (option) => option.value);
 
+  // If "Select All" is chosen, pull all available member IDs into the array
+  if (values.includes("all")) {
+    setSelectedMembers(members.map((m) => m.id));
+  } else {
+    setSelectedMembers(values);
+  }
+};
   return (
     <div className="min-h-screen bg-[#020617] text-slate-200 p-4 md:p-8 relative flex flex-col items-center">
       <div className="fixed top-0 right-0 h-125 w-125 rounded-full bg-emerald-500/10 blur-[120px] pointer-events-none" />
@@ -149,29 +197,65 @@ export default function AddTask() {
           </div>
 
           {/* TEAM SELECT */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-slate-400">Select Team</label>
-            <div className="relative w-full">
-              <select 
-                name="team_id"
-                value={task.team_id}
-                onChange={handleChange}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white appearance-none focus:outline-none focus:border-emerald-500 cursor-pointer"
-              >
-                <option value="" className="text-slate-600 bg-slate-950">Choose a team...</option>
-                {filteredTeams.map((team) => (
-                  <option key={team.id} value={team.id} className="bg-slate-950 text-white">
-                    {team.name}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-          </div>
+      <div className="flex flex-row gap-2  mx-auto ">
+      {/* 1. SELECT TEAM DROPDOWN */}
+      
+      <div className="relative w-full">
+        <select 
+          name="team_id"
+          value={task.team_id}
+          onChange={handleTeamChange} // Uses our custom wrapper handler
+          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white appearance-none focus:outline-none focus:border-emerald-500 cursor-pointer"
+        >
+          <option value="" className="text-slate-600 bg-slate-950">Choose a team...</option>
+          {filteredTeams.map((team) => (
+            <option key={team.id} value={team.id} className="bg-slate-950 text-white">
+              {team.name}
+            </option>
+          ))}
+        </select>
+        
+      </div>
+
+      {/* 2. SELECT MEMBER DROPDOWN */}
+      
+      <div className="relative w-full">
+<select
+        multiple
+        name="team_member_ids_display" 
+        value={selectedMembers}
+        onChange={handleMemberChange}
+        disabled={isPending || !task.team_id}
+        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 cursor-pointer min-h-[120px] disabled:opacity-50"
+      >
+        {task.team_id && members.length > 0 && (
+          <option value="all" className="text-emerald-400 font-bold bg-slate-950">
+            ✨ Select All Members
+          </option>
+        )}
+
+        {isPending ? (
+          <option disabled className="text-slate-500 bg-slate-950">Loading...</option>
+        ) : !task.team_id ? (
+          <option disabled className="text-slate-500 bg-slate-950">Choose a team first...</option>
+        ) : members.length === 0 ? (
+          <option disabled className="text-slate-500 bg-slate-950">No members found</option>
+        ) : (
+          members.map((member) => (
+            <option key={member.id} value={member.id} className="bg-slate-950 text-white">
+              {member.firstName} {member.secondName}
+            </option>
+          ))
+        )}
+      </select>
+
+      {/* Hidden inputs ensure your traditional Server Action formData picks up the array */}
+      {selectedMembers.map((id) => (
+        <input type="hidden" key={id} name="team_member_ids" value={id} />
+      ))}
+    </div>
+       
+</div>
 
           {/* FAVORITE */}
           <div className="flex items-center gap-3 pt-2">

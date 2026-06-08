@@ -182,3 +182,37 @@ export async function removeMemberFromTeam(params: { teamId: string; userId: str
   await prisma.teamMember.deleteMany({ where: { team_id: params.teamId, user_id: params.userId } });
 }
 
+export async function fetchTeamMembers(teamId?:string){
+  if (!teamId) return [];
+
+  const members = await prisma.teamMember.findMany({
+    where:{
+      team_id:teamId
+
+    },
+    select:{
+      id:true,
+    
+      user:{
+        select:{
+          id:true, firstName:true, secondName:true, }
+        },
+      }
+    })
+    return members.map((member) => {
+    const { user, ...memberDetails } = member;
+    return {
+      ...memberDetails,
+      userId: user.id,
+      firstName: user.firstName,
+      secondName: user.secondName,
+      
+    };
+  });
+  }  
+
+
+
+
+
+

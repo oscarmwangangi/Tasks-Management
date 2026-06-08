@@ -42,25 +42,59 @@ const SecurityOptionsSchema = z.object({
 });
 
 interface SettingsClientProps {
-    session: any 
+  session: any;
 }
 
-export default function SettingsClient({session}:SettingsClientProps) {
-  const [currentPassword, setCurrentPassword ] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
+export default function SettingsClient({ session }: SettingsClientProps) {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [changePasswordError, setChangePasswordError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [ isReminderEnabled, setIsReminderEnabled ] = useState(false);
+  const [logoutPending, setLogoutPending] = useState(false);
   const [reminderLoading, setReminderLoading] = useState(false);
 
+  // 1. Unified preferences object state initializer
+  const [prefs, setPrefs] = useState<Record<string, boolean>>(() => {
+    if (typeof window !== "undefined") {
+      const savedPrefs = localStorage.getItem("user_notifications_prefs");
+      if (savedPrefs) {
+        try {
+          return JSON.parse(savedPrefs);
+        } catch (e) {
+          console.error("Failed to parse preferences from localStorage", e);
+        }
+      }
+    }
+   
+  });
 
-   async function validatePassword() {
+  // 2. Standalone boolean reminder state initializer (Synced with prefs)
+  const [isReminderEnabled, setIsReminderEnabled] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      const savedStatus = localStorage.getItem("taskReminders");
+      if (savedStatus !== null) {
+        return savedStatus === "true";
+      }
+      // If taskReminders key doesn't exist yet, fall back to initial prefs state logic
+      return false;
+    }
+    return false;
+  });
 
+  // 3. Dynamic layout/user computations
+  const emailAndName = useMemo(() => {
+    return {
+      email: session?.user?.email ?? "—",
+      name: session?.user?.name ?? "—",
+    };
+  }, [session]);
+
+  // 4. Password validation logic
+  async function validatePassword() {
     setChangePasswordError(null);
-     const parsed = SecurityOptionsSchema.safeParse({
-
+    const parsed = SecurityOptionsSchema.safeParse({
       currentPassword: currentPassword,
       newPassword: newPassword,
       confirmPassword: confirmPassword,
@@ -69,75 +103,86 @@ export default function SettingsClient({session}:SettingsClientProps) {
     if (!parsed.success) {
       setChangePasswordError(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
+    }
+
+    setLoading(true);
+    try {
+      const created = await changePassword({
+        currentPassword: parsed.data.currentPassword,
+        newPassword: parsed.data.newPassword,
+        confirmPassword: parsed.data.confirmPassword,
+      });
+      setSuccessMessage(created.message);
+      setChangePasswordError(null);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (e: unknown) {
+      setChangePasswordError(e instanceof Error ? e.message : "Failed to change password");
+    } finally {
+      setLoading(false);
+    }
   }
-  
-  setLoading(true);
 
-  try {
-    const created = await changePassword({
-      currentPassword: parsed.data.currentPassword,
-      newPassword: parsed.data.newPassword,
-      confirmPassword: parsed.data.confirmPassword,
-    });
-    setSuccessMessage(created.message);
-    setChangePasswordError(null);
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-  } catch (e: unknown) {
-    setChangePasswordError(e instanceof Error ? e.message : "Failed to change password");
-  } finally {
-    setLoading(false);
-  }
-}
-
-
-  const [prefs, setPrefs] = useState<Record<string, boolean>>(() => {
-    // local-only defaults for now
-    return notificationOptions.reduce((acc, opt, i) => {
-      acc[opt.id] = i === 0; // email updates on by default
-      return acc;
-    }, {} as Record<string, boolean>);
-  });
-
-const emailAndName = useMemo(() => {
-    // Session isn’t wired into this page yet. Keep a safe placeholder.
-    // If you later pass session as prop (like DashboardClient does), wire it here.
-    return {
-      email: "—",
-      name: "—",
-    };
-  }, []);
-
-  // Avoid unused warnings in case session is later wired.
-  void emailAndName;
-
-
-  const [logoutPending, setLogoutPending] = useState(false);
-
+  // 5. Shared state toggle handler
   const handleToggle = async (id: string) => {
     setReminderLoading(true);
-    setPrefs((prev) => ({ ...prev, [id]: !prev[id] }));
-    if(id === "taskReminders"){
 
-      const result = await toggleRemindersAction(isReminderEnabled);
-      if(result.success){
-        setIsReminderEnabled(result.newStatus);
+    const nextValue = !prefs[id];
+    const nextPrefs = { ...prefs, [id]: nextValue };
 
+    // Optimistic Update
+    setPrefs(nextPrefs);
+    localStorage.setItem("user_notifications_prefs", JSON.stringify(nextPrefs));
 
-      }else{
+    if (id === "taskReminders") {
+      // Sync the redundant standalone toggle optimistically
+      setIsReminderEnabled(nextValue);
+      localStorage.setItem("taskReminders", String(nextValue));
+
+      try {
+        const result = await toggleRemindersAction(nextValue);
+
+        if (result.success && result.newStatus !== undefined) {
+          // Confirm with database source of truth
+          setIsReminderEnabled(result.newStatus);
+          localStorage.setItem("taskReminders", String(result.newStatus));
+          
+          // Ensure prefs object stays aligned with DB override
+          setPrefs((prev) => {
+            const updated = { ...prev, taskReminders: result.newStatus };
+            localStorage.setItem("user_notifications_prefs", JSON.stringify(updated));
+            return updated;
+          });
+        } else {
+          throw new Error("Backend update unsuccessful");
+        }
+      } catch (error) {
+        // Rollback EVERYTHING if it fails
+        const revertedPrefs = { ...prefs, [id]: prefs[id] };
+        setPrefs(revertedPrefs);
+        localStorage.setItem("user_notifications_prefs", JSON.stringify(revertedPrefs));
+
+        setIsReminderEnabled(prefs[id]);
+        localStorage.setItem("taskReminders", String(prefs[id]));
+
         alert("Something went wrong updating your settings.");
+      } finally {
+        setReminderLoading(false);
       }
-      setReminderLoading(false);
+      return;
     }
+
+    setReminderLoading(false);
   };
 
-
-
+  // 6. Secure logout handler
   const handleLogout = async () => {
     try {
       setLogoutPending(true);
       localStorage.removeItem("user");
+      localStorage.removeItem("user_notifications_prefs");
+      localStorage.removeItem("taskReminders");
       await handleServerLogout();
     } catch (e) {
       console.error("Logout failed:", e);
@@ -145,6 +190,7 @@ const emailAndName = useMemo(() => {
       setLogoutPending(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-[#020617] text-white p-4 md:p-6 overflow-hidden relative">

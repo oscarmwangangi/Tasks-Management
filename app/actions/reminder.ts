@@ -5,18 +5,33 @@ import { auth } from "../middlware/auth";
 import nodemailer from "nodemailer";
 
 
-export async function toggleRemindersAction(currentStatus: boolean){
+export async function toggleRemindersAction(targetStatus: boolean) {
     const session = await auth();
     const userId = session?.user?.id;
-    if (!userId) throw new Error("Missing createdByUserId");
+    
+    if (!userId) {
+        return { success: false, error: "Unauthorized" };
+    }
 
     try {
-        const reminder = await prisma.user.update({
-            where: {id: userId},
-            data:{ reminderEnable: !currentStatus}
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: { 
+                // Set it directly to the exact boolean value desired
+                reminderEnable: targetStatus 
+            }
         });
-        return {success: true, newStatus: !currentStatus};
-    } catch (error) {
-        throw new Error("Failed to update reminder status" + error);
+        
+        return { 
+            success: true, 
+            newStatus: updatedUser.reminderEnable 
+        };
+} catch (error) {
+        console.error("Database update failed:", error);
+        return { 
+            success: false, 
+            error: "Failed to update reminder status" 
+        };
     }
+
 }

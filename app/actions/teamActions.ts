@@ -31,7 +31,7 @@ export async function fetchTeams() {
     },
   });
 
-  return teams.map((t) => ({
+  return teams.map((t:any) => ({
     id: t.id,
     name: t.name,
     created_at: t.created_at,
@@ -42,7 +42,7 @@ export async function fetchTeams() {
           email: t.creator.email,
         }
       : null,
-    members: t.members.map((m) => ({
+    members: t.members.map((m : any) => ({
       id: m.id,
       user_id: m.user_id,
       name: `${m.user.firstName} ${m.user.secondName}`.trim(),
@@ -52,9 +52,9 @@ export async function fetchTeams() {
     })),
     tasksCount: t._count.tasks,
     // 2.  Keep track of completed vs active if needed
-    completedTasksCount: t.tasks.filter(task => task.status === "done").length,
+    completedTasksCount: t.tasks.filter((task : any) => task.status === "done").length,
     //  Pass down the transformed task array
-    tasks: t.tasks.map((task) => ({
+    tasks: t.tasks.map((task : any) => ({
       id: task.id,
       title: task.title,
       status: task.status,

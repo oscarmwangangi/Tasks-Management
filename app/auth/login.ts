@@ -101,7 +101,7 @@ export async function verifyLoginOtp(
 
   const otp =
     formData.get("otp")?.toString().trim() || "";
-
+console.log(otp)
   const token =
     formData.get("token")?.toString() || "";
 

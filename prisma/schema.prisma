@@ -4,13 +4,13 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  
 }
 
 // --- Enums for type safety ---
 
 enum Role {
   admin
+  super_admin
   user
 }
 
@@ -37,6 +37,17 @@ enum MessageType {
 
 // --- Models ---
 
+model Section {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String   @unique // e.g., "Section A", "Section B"
+  created_at DateTime @default(now())
+
+  users        User[]
+  teams        Team[]
+  tasks        Task[]
+  inviteTokens InviteToken[]
+}
+
 model User {
   id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   firstName      String
@@ -51,6 +62,9 @@ model User {
   accounts       Account[]
   sessions       Session[]
   reminderEnable Boolean   @default(true)
+
+  section_id String?  @db.Uuid // Nullable so Super Admins can look across all panels
+  section    Section? @relation(fields: [section_id], references: [id])
 
   // Relations
   teamsCreated  Team[]       @relation("TeamCreator")
@@ -102,6 +116,9 @@ model Team {
   created_by String?  @db.Uuid
   created_at DateTime @default(now())
 
+  section_id String?  @db.Uuid // Ties this team explicitly to a specific admin panel
+  section    Section? @relation(fields: [section_id], references: [id])
+
   // Relations
   creator User?        @relation("TeamCreator", fields: [created_by], references: [id])
   members TeamMember[]
@@ -139,6 +156,9 @@ model Task {
   assigned_to String? @db.Uuid
   team_id     String? @db.Uuid
 
+  section_id String?  @db.Uuid // Ties this task to the panel sandbox
+  section    Section? @relation(fields: [section_id], references: [id])
+
   // Relations
   creator   User?      @relation("TaskCreator", fields: [created_by], references: [id])
   assignee  User?      @relation("TaskAssignee", fields: [assigned_to], references: [id])
@@ -159,6 +179,17 @@ model TaskAssignment {
   teamMember TeamMember @relation(fields: [team_member_id], references: [id], onDelete: Cascade)
 
   @@unique([task_id, team_member_id]) // Prevents assigning the same member twice
+}
+
+
+model InviteToken {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  token      String   @unique // A random secure string or UUID
+  section_id String?   @db.Uuid
+  section    Section?  @relation(fields: [section_id], references: [id], onDelete: Cascade)
+  role       Role     @default(user) // You can even let admins invite other lower-level admins
+  expires_at DateTime
+  created_at DateTime @default(now())
 }
 
 model Favorite {

@@ -9,7 +9,7 @@ import { DashboardTask } from "@/app/services/tableData";
 export function useDashboardHooks(customPageSize:number) {
   const [stats, setStats] = useState<any>(null);
   const [priority, setPriority] = useState<any>(null);
-  
+
   const [table, setTable] = useState<{
     tasks: Task[];
     pagination: any;
@@ -19,7 +19,7 @@ export function useDashboardHooks(customPageSize:number) {
   const [loading, setLoading] = useState(true);
 
   const [selectedTask, setSelectedTask] = useState<DashboardTask | null>(null);
-  
+
   // Modal visibility flags
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -39,6 +39,7 @@ export function useDashboardHooks(customPageSize:number) {
     const size = customPageSize || 5;
     try {
       setLoading(true);
+      // Services now call auth() internally for session/section scoping
       const [statsData, priorityData, taskData] = await Promise.all([
         getDashboardCards(),
         doughnutData(),
@@ -57,7 +58,7 @@ export function useDashboardHooks(customPageSize:number) {
 
   useEffect(() => {
     loadDashboard();
-  }, [page]);
+  }, [page, customPageSize]);
 
   // Polar Area Chart Data
   const polarData = useMemo(

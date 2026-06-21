@@ -117,8 +117,8 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white p-4 md:p-6 overflow-hidden relative">
-      <div className="fixed top-0 right-0 h-125 w-125 rounded-full bg-emerald-500/10 blur-[120px] pointer-events-none" />
+    <div className="min-h-screen bg-[#020617] text-white p-4 md:p-6 overflow-hidden relative w-full">
+      <div className="fixed top-0 right-0 h-28 w-28 sm:h-40 sm:w-40 rounded-full bg-emerald-500/10 blur-[80px] pointer-events-none" />
 
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -229,16 +229,15 @@ export default function ProjectsPage() {
 
         </div>
       </div>
-        <ReusableTable 
-          title="Recent Tasks"
-          data={table?.tasks}
-          columns={taskColumns}
-          pagination={table?.pagination}
-          onPageChange={setPage}
-
-                  
-        
-        />
+        <div className="w-full px-0 sm:px-0">
+          <ReusableTable 
+            title="Recent Tasks"
+            data={table?.tasks}
+            columns={taskColumns}
+            pagination={table?.pagination}
+            onPageChange={setPage}
+          />
+        </div>
     {isUpdateModalOpen && selectedTask && (
       <UpdateTaskModal 
         task={selectedTask}

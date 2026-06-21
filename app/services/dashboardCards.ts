@@ -1,17 +1,24 @@
 "use server";
 import prisma from "@/lib/prisma";
 import { TaskStatus } from "@prisma/client";
+import { auth } from "@/app/middlware/auth";
+import { getScopedFilter } from "@/lib/api-security";
 
 export async function getDashboardCards() {
-    
+    const session = await auth();
+    if (!session?.user) throw new Error("Unauthorized: No session");
+
+    const scopedWhere = getScopedFilter(session.user as any, {});
+
     const stats = await prisma.task.groupBy({
         by: ['status'],
+        where: scopedWhere,
         _count: {
             _all: true,
         },
     });
-
-    // Initialize counts for the statuses 
+console.log("Dashboard Stats", stats);
+    // Initialize counts for the statuses
     const counts = {
         total: 0,
         backlog: 0,
@@ -51,8 +58,23 @@ export async function getDashboardCards() {
         }
     });
 
+    const overdueTasks = await prisma.task.count({
+        where: {
+            ...scopedWhere,
+            due_date: { lt: new Date() },
+            status: { not: TaskStatus.done },
+        },
+    });
+
+    const activeTeamsCount = await prisma.team.count({
+        where: scopedWhere,
+    });
+
     return {
         totalTasks: counts.total,
+        completedTasks: counts.done,
+        overdueTasks,
+        activeTeams: activeTeamsCount,
         backlogTasks: counts.backlog,
         todoTasks: counts.todo,
         inProgressTasks: counts.in_progress,

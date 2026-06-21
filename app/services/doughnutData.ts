@@ -1,10 +1,18 @@
 "use server";
 import { TaskPriority } from "@prisma/client";
 import prisma from "@/lib/prisma";
+import { auth } from "@/app/middlware/auth";
+import { getScopedFilter } from "@/lib/api-security";
 
 export async function doughnutData() {
+    const session = await auth();
+    if (!session?.user) throw new Error("Unauthorized: No session");
+
+    const scopedWhere = getScopedFilter(session.user as any, {});
+
     const data = await prisma.task.groupBy({
         by: ["priority"],
+        where: scopedWhere,
         _count: {
             priority: true,
         },
@@ -30,7 +38,7 @@ export async function doughnutData() {
                 break;
         }
     });
-  
+
     return{
         lowStatus: count.low,
         mediumStatus: count.medium,

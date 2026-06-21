@@ -29,7 +29,7 @@ export function ReusableTable<T>({
 }: ReusableTableProps<T>) {
   
   return (
-    <div className="mt-8 group rounded-3xl border border-white/5 bg-white/3 p-5 transition-all hover:border-emerald-500/20 hover:bg-white/5 hover:shadow-xl hover:shadow-black/20 overflow-hidden">
+      <div className="mt-8 group rounded-3xl border border-white/5 bg-white/3 p-4 sm:p-5 transition-all hover:border-emerald-500/20 hover:bg-white/5 hover:shadow-xl hover:shadow-black/20 overflow-hidden w-full">
       
       {/* Header Section */}
       <div className="p-6 border-b border-white/10 flex items-center justify-between">
@@ -43,11 +43,11 @@ export function ReusableTable<T>({
 
       {/* Table Section */}
       <div className="overflow-x-auto">
-        <table className="w-full min-w-225">
+        <table className="w-full min-w-[640px] sm:min-w-[740px] lg:min-w-full">
           <thead className="bg-white/5">
             <tr className="text-left text-slate-400 text-sm">
               {columns.map((col, index) => (
-                <th key={index} className="p-5">
+                <th key={index} className="p-2 sm:p-3">
                   {col.header}
                 </th>
               ))}
@@ -62,7 +62,7 @@ export function ReusableTable<T>({
                   className="border-t border-white/5 hover:bg-white/5 transition-all"
                 >
                   {columns.map((col, colIndex) => (
-                    <td key={colIndex} className="p-5">
+                    <td key={colIndex} className="p-2 sm:p-3 align-top">
                       {col.render(item)}
                     </td>
                   ))}
@@ -81,7 +81,7 @@ export function ReusableTable<T>({
 
       {/* Pagination Section (Only renders if pagination props are provided) */}
       {pagination && onPageChange && (
-        <div className="p-5 border-t border-white/10 flex items-center justify-between">
+          <div className="p-4 sm:p-5 border-t border-white/10 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
           <p className="text-sm text-slate-400">
             Page {pagination.currentPage} of {pagination.totalPages}
           </p>

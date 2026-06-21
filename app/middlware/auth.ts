@@ -84,6 +84,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             email: dbUser.email,
             firstName: dbUser.firstName,
             lastName: dbUser.secondName,
+            role: dbUser.role,
+            section_id: (dbUser as any).section_id ?? null,
+          } as {
+            id: string;
+            email: string | null;
+            firstName: string;
+            lastName: string;
+            role: "admin" | "super_admin" | "user";
+            section_id: string | null;
           };
 
         } catch (error: any) {
@@ -100,12 +109,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.role = (user as any).role;
+        token.section_id = (user as any).section_id;
       }
       return token;
     },
     async session({ session, token }) {
-      if (token.sub && session.user) {
-        session.user.id = token.sub;
+      if (session.user) {
+        if (token.sub) session.user.id = token.sub;
+        session.user.role = token.role;
+        session.user.section_id = token.section_id;
       }
       return session;
     },

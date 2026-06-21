@@ -123,7 +123,7 @@ export async function registerUser(
 
 export async function verifyOtp(
   _state: ActionResult,
-  formData: FormData
+  formData: FormData,
 ): Promise<ActionResult> {
 
   const otp =
@@ -205,7 +205,21 @@ export async function verifyOtp(
         message: "User already exists.",
       };
     }
+    
+    const targetRole =  "admin"
 
+    let assignedSectionId: string | null = null;
+
+   
+    if (targetRole === "admin") {
+      // If we are spinning up a brand new admin, instantly create a unique workspace section for them using their email address
+      const newSection = await prisma.section.create({
+        data: {
+          name: `Section - ${decoded.email}`,
+        },
+      });
+      assignedSectionId = newSection.id;
+    }
     // ── Create user ──
     await prisma.user.create({
       data: {
@@ -213,6 +227,8 @@ export async function verifyOtp(
         secondName: decoded.secondName,
         email: decoded.email,
         password: decoded.password,
+        role: targetRole,
+        section_id: assignedSectionId,
       },
     });
 

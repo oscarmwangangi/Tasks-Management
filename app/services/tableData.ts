@@ -72,14 +72,14 @@ export async function tableData(page: number = 1, pageSize: number = 10) {
 
 export async function deleteTask(id: string) {
     const session = await auth();
-    // if (!session?.user?.section_id) throw new Error("Unauthorized: No session");
+    if (!session?.user?.section_id) throw new Error("Unauthorized: No session");
 
     try {
         // Verify task belongs to user's section before deletion
-        // const task = await prisma.task.findUnique({ where: { id } });
-        // if (!task || task.section_id !== session.user.section_id) {
-        //     throw new Error("Task not found or unauthorized");
-        // }
+        const task = await prisma.task.findUnique({ where: { id } });
+        if (!task || task.section_id !== session.user.section_id) {
+            throw new Error("Task not found or unauthorized");
+        }
 
         const deletedTask = await prisma.task.delete({
             where: { id },
@@ -94,14 +94,14 @@ export async function deleteTask(id: string) {
 
 export async function updateTask(id: string, data: Prisma.TaskUpdateInput) {
     const session = await auth();
-    // if (!session?.user?.section_id) throw new Error("Unauthorized: No session");
+    if (!session?.user?.section_id) throw new Error("Unauthorized: No session");
 
     try {
         // Verify task belongs to user's section before update
-        // const task = await prisma.task.findUnique({ where: { id } });
-        // if (!task || task.section_id !== session.user.section_id) {
-        //     throw new Error("Task not found or unauthorized");
-        // }
+        const task = await prisma.task.findUnique({ where: { id } });
+        if (!task || task.section_id !== session.user.section_id) {
+            throw new Error("Task not found or unauthorized");
+        }
 
         // Create a copy of data to avoid mutating the original
         const updateData = { ...data };

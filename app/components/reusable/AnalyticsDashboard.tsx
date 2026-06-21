@@ -99,28 +99,37 @@ export default function AnalyticsDashboard({
         <StatCard
           icon={<ListTodo className="h-6 w-6" />}
           label="Total Tasks"
-          value={ stats.todoTasks + stats.inProgressTasks + stats.activeTasks + stats.reviewTasks + stats.doneTasks}
+          value={
+            (stats?.todoTasks ?? 0) +
+            (stats?.inProgressTasks ?? 0) +
+            (stats?.activeTasks ?? 0) +
+            (stats?.reviewTasks ?? 0) +
+            (stats?.doneTasks ?? 0)
+          }
           subLabel="All tasks in section"
           color="emerald"
         />
+
         <StatCard
           icon={<CheckCircle className="h-6 w-6" />}
           label="Completed Tasks"
-          value={stats.doneTasks}
-          subLabel={`${stats.doneTasks}% complete`}
+          value={stats?.doneTasks ?? 0}
+          subLabel={`${stats?.doneTasks ?? 0}% complete`}
           color="blue"
         />
+
         <StatCard
           icon={<AlertCircle className="h-6 w-6" />}
           label="Overdue Tasks"
-          value={stats?.backlogTasks ?? 0}
+          value={stats?.overdueTasks ?? 0}
           subLabel="Past due date"
           color="rose"
         />
+
         <StatCard
           icon={<Layers className="h-6 w-6" />}
           label="Active Teams"
-          value={stats.activeTeams}
+          value={stats?.activeTeams ?? 0}
           subLabel="Teams in section"
           color="amber"
         />
@@ -156,12 +165,12 @@ export default function AnalyticsDashboard({
         <h3 className="text-lg font-semibold mb-4">Task Status Breakdown</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {[
-            { label: "Backlog", value: stats.backlogTasks, color: "bg-slate-500/20 text-slate-300" },
-            { label: "Todo", value: stats.todoTasks, color: "bg-blue-500/20 text-blue-300" },
-            { label: "In Progress", value: stats.inProgressTasks, color: "bg-amber-500/20 text-amber-300" },
-            { label: "Active", value: stats.activeTasks, color: "bg-cyan-500/20 text-cyan-300" },
-            { label: "Review", value: stats.reviewTasks, color: "bg-purple-500/20 text-purple-300" },
-            { label: "Done", value: stats.doneTasks, color: "bg-green-500/20 text-green-300" },
+            { label: "Backlog", value: stats?.backlogTasks ?? 0, color: "bg-slate-500/20 text-slate-300" },
+            { label: "Todo", value: stats?.todoTasks ?? 0, color: "bg-blue-500/20 text-blue-300" },
+            { label: "In Progress", value: stats?.inProgressTasks ?? 0, color: "bg-amber-500/20 text-amber-300" },
+            { label: "Active", value: stats?.activeTasks ?? 0, color: "bg-cyan-500/20 text-cyan-300" },
+            { label: "Review", value: stats?.reviewTasks ?? 0, color: "bg-purple-500/20 text-purple-300" },
+            { label: "Done", value: stats?.doneTasks ?? 0, color: "bg-green-500/20 text-green-300" },
           ].map((status) => (
             <div key={status.label} className={`rounded-2xl p-4 text-center ${status.color}`}>
               <p className="text-2xl font-bold">{status.value}</p>

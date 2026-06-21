@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/taskUpdate",
-      "schedule": "* 8 * * * *"
+      "schedule": "0 5 * * *"
     }
   ]
 }

@@ -17,14 +17,14 @@ export default async function updateStatus() {
     },
   });
 
-  // 1. Get overdue tasks that are NOT already backlog
+  // 1. Get overdue tasks that are NOT "Done" (Include backlog so they keep getting emailed)
   const tasks = await prisma.task.findMany({
     where: {
       end_date: {
         lt: now,
       },
       status: {
-        not: "backlog",
+        notIn: ["done"], // Excludes Done tasks; fetches everything else (including backlog)
       },
     },
     include: {
@@ -32,7 +32,13 @@ export default async function updateStatus() {
         include: {
           teamMember: {
             include: {
-              user: true,
+              user: {
+                select: {
+                  email: true,
+                  firstName: true,
+                  reminderEnable: true,
+                }
+              }
             },
           },
         },
@@ -46,11 +52,13 @@ export default async function updateStatus() {
   const usersMap: Record<string, { firstName: string; tasks: any[] }> = {};
 
   for (const task of tasks) {
-    // 3. Update task status
-    await prisma.task.update({
-      where: { id: task.id },
-      data: { status: "backlog" },
-    });
+    // 3. ONLY update task status to backlog if it isn't already in backlog
+    if (task.status !== "backlog") {
+      await prisma.task.update({
+        where: { id: task.id },
+        data: { status: "backlog" },
+      });
+    }
 
     // 4. Collect users per task
     for (const assignment of task.assignedMembers) {
@@ -67,19 +75,28 @@ export default async function updateStatus() {
         };
       }
 
-      usersMap[email].tasks.push(task);
+      // Add task info for the AI prompt context
+      usersMap[email].tasks.push({
+        title: task.title,
+        description: task.description,
+        end_date: task.end_date,
+        current_status: task.status // Let OpenAI know if it's newly moved or remaining there
+      });
     }
   }
 
   // 5. Send emails per user
   for (const [email, data] of Object.entries(usersMap)) {
+    // Skip sending email if this user actually has no tasks targeted
+    if (data.tasks.length === 0) continue;
+
     const aiResponse = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
           content:
-            "You are a task assistant. Explain that tasks have been moved to BACKLOG due to deadline expiry. Keep it short and helpful.",
+            "You are a task assistant. Explain politely that the following tasks are currently in the BACKLOG due to deadline expiry and require attention. Keep it short and actionable.",
         },
         {
           role: "user",
@@ -98,18 +115,18 @@ export default async function updateStatus() {
     await transporter.sendMail({
       from: process.env.EMAIL_FROM,
       to: email,
-      subject: "⚠️ Tasks moved to BACKLOG",
+      subject: "⚠️ Reminder: Tasks remaining in BACKLOG",
       html: `
         <div style="font-family: Arial; padding: 20px;">
-          <h2>Backlog Update</h2>
-          <p>Hello ${data.firstName}, the following tasks have been moved to BACKLOG:</p>
+          <h2>Backlog Attention Required</h2>
+          <p>Hello ${data.firstName}, the following tasks are in your BACKLOG because they passed their deadline:</p>
 
-          <div style="margin: 15px 0; padding: 12px; background: #f3f4f6; border-radius: 8px;">
+          <div style="margin: 15px 0; padding: 12px; background: #f3f4f6; border-radius: 8px; white-space: pre-wrap;">
             ${message}
           </div>
 
           <p style="font-size: 12px; color: #9ca3af;">
-            Automated TaskFlow System
+            Automated TaskFlow System • Emails repeat daily until tasks are updated.
           </p>
         </div>
       `,

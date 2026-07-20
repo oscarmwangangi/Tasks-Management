@@ -1,12 +1,17 @@
 {
   "crons": [
     {
-      "path": "/api/agent",
-      "schedule": "0 8 * * *"
+      "path": "/api/reminder",
+      "schedule": "0 6 * * *"
     },
     {
       "path": "/api/taskUpdate",
       "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/agent",
+      "schedule":"0 8 * * *"
     }
+
   ]
 }
